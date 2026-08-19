@@ -7,6 +7,8 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import logo from '../assets/nako-logo.svg';
 import imgLogin from '../assets/img-login.png';
+import googleIcon from '../assets/icon/google.svg';
+import appleIcon from '../assets/icon/apple.svg';
 
 export function Login() {
   const { user, refreshAuth } = useAuth();
@@ -155,10 +157,12 @@ export function Login() {
             </div>
 
             <div className="flex gap-4">
-              <Button type="button" variant="auth" fullWidth={false} className="flex-1">
+              <Button type="button" variant="auth" fullWidth={false} className="flex-1 flex items-center justify-center gap-2">
+                <img src={googleIcon} alt="Google Icon" className="w-5 h-5" />
                 Google
               </Button>
-              <Button type="button" variant="auth" fullWidth={false} className="flex-1">
+              <Button type="button" variant="auth" fullWidth={false} className="flex-1 flex items-center justify-center gap-2">
+                <img src={appleIcon} alt="Apple Icon" className="w-5 h-5" />
                 Apple
               </Button>
             </div>
