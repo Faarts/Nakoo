@@ -1,167 +1,249 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../lib/AuthContext';
-import { api } from '../lib/api';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarHeart, Utensils, Puzzle, ChevronRight, PlusCircle } from 'lucide-react';
-import { Button } from '../components/Button';
 import { TopBar } from '../components/TopBar';
+import { Button } from '../components/Button';
+import {
+  Users, Salad, Puzzle, ChevronRight,
+  Calendar, ShieldCheck, LineChart
+} from 'lucide-react';
+import homeHeroImg from '../home-hero.png';
 
 export function Home() {
-  const { profile } = useAuth();
-  
-  const [plan, setPlan] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-
-  useEffect(() => {
-    fetchPlan();
-  }, []);
-
-  const fetchPlan = async () => {
-    try {
-      const { plan } = await api.get('/api/daily-plans/today');
-      setPlan(plan);
-    } catch (err) {
-      console.error("Failed to fetch plan:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      await api.post('/api/daily-plans/generate');
-      await fetchPlan();
-    } catch (err) {
-      console.error("Failed to generate plan:", err);
-      setGenerating(false);
-    }
-  };
-
-  const hasPlan = !!plan;
-  const completedCount = plan?.slots?.filter(s => s.status === 'done').length || 0;
-  const totalCount = plan?.slots?.length || 0;
-
-  // Helper untuk hitung usia (bulan)
-  const getAgeInMonths = (birthDateString) => {
-    if (!birthDateString) return '';
-    const birthDate = new Date(birthDateString);
-    const today = new Date();
-    const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-    return `${ageInMonths} bulan`;
-  };
-
-  const childName = profile?.child_name || 'Si Kecil';
-  const childAge = getAgeInMonths(profile?.birth_date);
-
   return (
-    <div className="flex flex-col min-h-screen pb-6 bg-neutral-50">
-      
-      {/* Header Container */}
-      <div className="bg-white rounded-b-[32px] shadow-sm pb-8 pt-safe">
-        <TopBar 
-          onMenuClick={() => console.log('Menu clicked')} 
-          onNotificationClick={() => console.log('Notification clicked')} 
-        />
-        
-        <header className="px-6 mt-4">
-          <h1 className="text-2xl font-semibold text-neutral-800 leading-tight">
-            Rencana hari ini <br/>untuk <span className="text-primary-500">{childName}</span>
+    <div className="flex flex-col min-h-screen bg-[#FFFBF8] pb-20">
+      <TopBar />
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#F2F8F7] to-[#FAF9F6]">
+        <div className="absolute top-6 left-6 z-10">
+          <h1 className="text-[32px] leading-tight font-medium text-neutral-800 max-w-[300px]">
+            Karena setiap si kecil<br />tumbuh <span className="text-nakooGreen-500 font-semibold">berbeda</span>
           </h1>
-          {childAge && (
-            <p className="mt-1 text-sm font-medium text-neutral-500">
-              Usia {childAge}
-            </p>
-          )}
-        </header>
-      </div>
+        </div>
 
-      <main className="px-6 py-6 flex-1 flex flex-col gap-6">
-        
-        {/* State: Belum/Sudah Ada Rencana */}
-        <section>
-          {loading ? (
-             <div className="bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 flex items-center justify-center min-h-[200px]">
-               <p className="text-neutral-400">Memuat rencana...</p>
-             </div>
-          ) : !hasPlan ? (
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center mb-4">
-                <CalendarHeart className="w-8 h-8" />
-              </div>
-              <h2 className="text-lg font-semibold text-neutral-800 mb-2">Belum Ada Rencana</h2>
-              <p className="text-sm text-neutral-500 mb-6">
-                Yuk, buat rencana makan dan bermain {childName} untuk hari ini agar lebih terstruktur!
-              </p>
-              <Button onClick={handleGenerate} disabled={generating} className="w-full flex justify-center items-center gap-2">
-                <PlusCircle className="w-5 h-5" /> {generating ? 'Membuat...' : 'Buat Rencana Hari Ini'}
-              </Button>
+        {/* Mom & Child Illustration */}
+        <div className="w-full pt-12 relative z-0 flex justify-center">
+          <img src={homeHeroImg} alt="Ilustrasi Ibu & Anak" className="w-full h-auto object-cover" />
+        </div>
+      </section>
+
+      {/* Menu Makan Pilihan */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center px-6 mb-4">
+          <h2 className="text-base font-semibold text-neutral-800">Menu makan pilihan</h2>
+          <Link to="/explore/menu" className="text-neutral-400 hover:text-neutral-600">
+            <ChevronRight className="w-5 h-5" />
+          </Link>
+        </div>
+        <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
+          {/* Card 1 */}
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?auto=format&fit=crop&w=300&q=80" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-neutral-100">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-base font-semibold text-neutral-800">Preview Hari Ini</h2>
-                <span className="text-xs font-medium bg-nakooGreen-50 text-nakooGreen-600 px-2 py-1 rounded-full">
-                  {completedCount}/{totalCount} Selesai
-                </span>
-              </div>
-              
-              <div className="flex flex-col gap-3 mb-5">
-                {plan.slots.map((slot, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${slot.status === 'done' ? 'bg-nakooGreen-500' : 'bg-primary-400'}`}></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-800">
-                        {slot.type === 'meal' ? 'Menu Makan' : 'Aktivitas'} ({slot.time})
-                      </p>
-                      <p className="text-xs text-neutral-500">{slot.item?.title || 'Tidak ada judul'}</p>
-                    </div>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${slot.status === 'done' ? 'bg-nakooGreen-500 border border-nakooGreen-500' : 'border-2 border-neutral-200'}`}>
-                       {slot.status === 'done' && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Link to="/my-page">
-                <Button variant="secondary" className="w-full">
-                  Lihat Rencana Lengkap
-                </Button>
-              </Link>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-red-50 text-red-600 rounded-full flex items-center">🍎 Buah</span>
+              <span className="text-[10px] font-medium px-2 py-1 bg-yellow-50 text-yellow-600 rounded-full flex items-center">🧀 Keju</span>
             </div>
-          )}
-        </section>
+          </Link>
+          {/* Card 2 */}
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=300&q=80" alt="Pasta" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Pasta Daging Sapi Sayuran</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-red-50 text-red-600 rounded-full flex items-center">🍎 Buah</span>
+              <span className="text-[10px] font-medium px-2 py-1 bg-yellow-50 text-yellow-600 rounded-full flex items-center">🧀 Keju</span>
+            </div>
+          </Link>
+          {/* Card 3 */}
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?auto=format&fit=crop&w=300&q=80" alt="Alpucok" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-red-50 text-red-600 rounded-full flex items-center">🍎 Buah</span>
+              <span className="text-[10px] font-medium px-2 py-1 bg-yellow-50 text-yellow-600 rounded-full flex items-center">🧀 Keju</span>
+            </div>
+          </Link>
+          {/* Card 4 */}
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=300&q=80" alt="Pasta" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Pasta Daging Sapi Sayuran</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-red-50 text-red-600 rounded-full flex items-center">🍎 Buah</span>
+              <span className="text-[10px] font-medium px-2 py-1 bg-yellow-50 text-yellow-600 rounded-full flex items-center">🧀 Keju</span>
+            </div>
+          </Link>
+          {/* Card 5 */}
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?auto=format&fit=crop&w=300&q=80" alt="Alpucok" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-red-50 text-red-600 rounded-full flex items-center">🍎 Buah</span>
+              <span className="text-[10px] font-medium px-2 py-1 bg-yellow-50 text-yellow-600 rounded-full flex items-center">🧀 Keju</span>
+            </div>
+          </Link>
+        </div>
+      </section>
 
-        {/* Shortcuts */}
-        <section>
-          <h3 className="text-sm font-semibold text-neutral-600 mb-3 px-1">Eksplorasi</h3>
-          <div className="grid grid-cols-2 gap-4">
-            
-            <Link to="/explore/menu" className="block bg-white p-4 rounded-2xl shadow-sm border border-neutral-100 hover:border-primary-200 transition-colors">
-              <div className="w-10 h-10 bg-nakooRed-50 text-nakooRed-500 rounded-xl flex items-center justify-center mb-3">
-                <Utensils className="w-5 h-5" />
-              </div>
-              <h4 className="font-semibold text-neutral-800 text-sm">Resep Makan</h4>
-              <p className="text-xs text-neutral-500 mt-1 flex items-center">
-                Lihat menu <ChevronRight className="w-3 h-3 ml-1" />
-              </p>
-            </Link>
+      {/* Aktivitas Pilihan */}
+      <section className="mb-10">
+        <div className="flex justify-between items-center px-6 mb-4">
+          <h2 className="text-base font-semibold text-neutral-800">Aktivitas Pilihan</h2>
+          <Link to="/explore/activity" className="text-neutral-400 hover:text-neutral-600">
+            <ChevronRight className="w-5 h-5" />
+          </Link>
+        </div>
+        <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
+          {/* Card 1 */}
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=300&q=80" alt="Puzzle" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Puzzle Bentuk</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-nakooBlue-50 text-nakooBlue-600 rounded-full">Quiet Time</span>
+            </div>
+          </Link>
+          {/* Card 2 */}
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1534448553655-b4618e932454?auto=format&fit=crop&w=300&q=80" alt="Main Air" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-primary-50 text-primary-600 rounded-full">Kertas</span>
+            </div>
+          </Link>
+          {/* Card 3 */}
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=300&q=80" alt="Puzzle" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Puzzle Bentuk</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-nakooBlue-50 text-nakooBlue-600 rounded-full">Quiet Time</span>
+            </div>
+          </Link>
+          {/* Card 4 */}
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1534448553655-b4618e932454?auto=format&fit=crop&w=300&q=80" alt="Main Air" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-primary-50 text-primary-600 rounded-full">Kertas</span>
+            </div>
+          </Link>
+          {/* Card 5 */}
+          <Link to="/explore/activity" className="min-w-[160px] max-w-[160px] snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=300&q=80" alt="Puzzle" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Puzzle Bentuk</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium px-2 py-1 bg-nakooBlue-50 text-nakooBlue-600 rounded-full">Quiet Time</span>
+            </div>
+          </Link>
+        </div>
+      </section>
 
-            <Link to="/explore/activity" className="block bg-white p-4 rounded-2xl shadow-sm border border-neutral-100 hover:border-primary-200 transition-colors">
-              <div className="w-10 h-10 bg-nakooBlue-50 text-nakooBlue-500 rounded-xl flex items-center justify-center mb-3">
-                <Puzzle className="w-5 h-5" />
-              </div>
-              <h4 className="font-semibold text-neutral-800 text-sm">Ide Aktivitas</h4>
-              <p className="text-xs text-neutral-500 mt-1 flex items-center">
-                Lihat ide <ChevronRight className="w-3 h-3 ml-1" />
-              </p>
-            </Link>
-
+      {/* CTA Banner */}
+      <section className="px-6 mb-10">
+        <div className="bg-primary-50 rounded-[32px] p-8 flex flex-col items-center text-center relative overflow-hidden">
+          {/* Placeholder Bowl */}
+          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+            <Salad className="w-12 h-12 text-nakooGreen-500" />
           </div>
-        </section>
 
-      </main>
+          <h2 className="text-lg font-semibold text-neutral-800 mb-3 leading-snug">
+            Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakooGreen-600">si kecil</span>
+          </h2>
+          <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
+            Isi profil singkat si kecil, dan Nakoo bantu susun rencana harian yang pas setiap hari
+          </p>
+
+          <Link to="/login" className="w-full">
+            <Button className="w-full flex items-center justify-center gap-2">
+              Daftar Sekarang <span className="font-bold text-lg leading-none">→</span>
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Kenapa Nakoo? */}
+      <section className="px-6 mb-10">
+        <h2 className="text-base font-semibold text-neutral-800 mb-4">Kenapa Nakoo?</h2>
+        <div className="flex flex-col gap-3">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm border border-neutral-100">
+            <div className="w-12 h-12 shrink-0 bg-primary-50 text-primary-500 rounded-xl flex items-center justify-center">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-800 mb-1">Sesuai Usia</h3>
+              <p className="text-xs text-neutral-500 leading-relaxed">Rekomendasi menu & main otomatis menyesuaikan usia si kecil, tanpa perlu riset sendiri.</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm border border-neutral-100">
+            <div className="w-12 h-12 shrink-0 bg-nakooGreen-50 text-nakooGreen-500 rounded-xl flex items-center justify-center">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-800 mb-1">Aman dari Alergen</h3>
+              <p className="text-xs text-neutral-500 leading-relaxed">Cukup catat alergi si kecil sekali, Nakoo yang saring menu setiap harinya.</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm border border-neutral-100">
+            <div className="w-12 h-12 shrink-0 bg-nakooRed-50 text-nakooRed-400 rounded-xl flex items-center justify-center">
+              <LineChart className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-800 mb-1">Ikuti Tumbuh Kembang</h3>
+              <p className="text-xs text-neutral-500 leading-relaxed">Rencana harian ikut berubah seiring si kecil mencapai tahap perkembangan baru.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tahukah Ibu? */}
+      <section className="px-6 mb-10">
+        <div className="bg-primary-50 rounded-2xl p-4 flex items-center gap-4 border border-primary-100">
+          {/* Placeholder Blocks */}
+          <div className="w-16 h-16 shrink-0 bg-white rounded-xl shadow-sm flex items-center justify-center">
+            <Puzzle className="w-8 h-8 text-nakooBlue-500" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-nakooGreen-600 mb-1 flex items-center gap-1">
+              Tahukah Ibu? ✨
+            </h3>
+            <p className="text-[11px] text-neutral-500 leading-relaxed">
+              Rutinitas harian yang konsisten membantu anak merasa lebih aman dan mendukung tumbuh kembangnya.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="px-6 py-8 flex flex-col items-center border-t border-neutral-200 mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-2xl font-bold tracking-tight text-neutral-700 flex items-center gap-2">
+            <span className="text-primary-500">🌱</span> nakoo
+          </span>
+        </div>
+        <p className="text-xs text-neutral-500 mb-6">Tumbuh kembang si kecil, terencana</p>
+        <p className="text-[10px] text-neutral-400">© 2026 Nakoo. Semua hak dilindungi.</p>
+      </footer>
+
     </div>
   );
 }

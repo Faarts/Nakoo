@@ -4,7 +4,7 @@ import { Home, Utensils, Puzzle, User } from 'lucide-react';
 
 export function BottomNav() {
   const navItems = [
-    { to: '/home', icon: Home, label: 'Beranda' },
+    { to: '/', icon: Home, label: 'Beranda' },
     { to: '/explore/menu', icon: Utensils, label: 'Menu' },
     { to: '/explore/activity', icon: Puzzle, label: 'Aktivitas' },
     { to: '/my-page', icon: User, label: 'Profil' },

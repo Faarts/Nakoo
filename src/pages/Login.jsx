@@ -22,7 +22,7 @@ export function Login() {
 
   // Jika sudah login, redirect ke home (ProfileGuard akan handle jika belum setup profile)
   if (user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e) => {

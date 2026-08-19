@@ -18,11 +18,12 @@ function App() {
         <Router>
         <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative">
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/design" element={<DesignPreview />} />
             
             {/* Rute Publik dengan Layout */}
             <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
               <Route path="/explore/menu" element={<ExploreMenu />} />
               <Route path="/explore/activity" element={<ExploreActivity />} />
             </Route>
@@ -30,7 +31,6 @@ function App() {
             {/* Protected Routes (Harus Login) */}
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/home" element={<Home />} />
                 <Route path="/my-page" element={<MyPage />} />
               </Route>
             </Route>
