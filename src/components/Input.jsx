@@ -26,7 +26,7 @@ export function Input({
       
       <div className={`${baseWrapperStyles} ${wrapperClass}`}>
         {Icon && (
-          <Icon className={`w-5 h-5 ${isUnderline ? 'text-nakooIcon mr-3' : 'text-nakooIcon mr-2 absolute left-[12px]'}`} />
+          <Icon className={`w-5 h-5 ${isUnderline ? 'text-neutral-400 mr-3' : 'text-neutral-400 mr-2 absolute left-[12px]'}`} />
         )}
         
         <input 

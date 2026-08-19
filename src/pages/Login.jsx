@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { api } from '../lib/api';
 import { Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
@@ -9,7 +9,7 @@ import logo from '../assets/nako-logo.svg';
 import imgLogin from '../assets/img-login.png';
 
 export function Login() {
-  const { user } = useAuth();
+  const { user, refreshAuth } = useAuth();
   const [activeTab, setActiveTab] = useState('masuk'); // 'masuk' | 'daftar'
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,7 +19,6 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
 
   // Jika sudah login, redirect ke home (ProfileGuard akan handle jika belum setup profile)
   if (user) {
@@ -30,32 +29,14 @@ export function Login() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
     try {
       if (activeTab === 'daftar') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: name,
-            }
-          }
-        });
-
-        if (error) throw error;
-        // Bawaan Supabase butuh konfirmasi email jika tidak di-disable
-        setMessage("Berhasil daftar! Silakan cek email Anda untuk verifikasi (atau langsung login jika auto-confirm aktif).");
-
+        await api.post('/api/auth/register', { name, email, password });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
+        await api.post('/api/auth/login', { email, password });
       }
+      await refreshAuth();
     } catch (err) {
       setError(err.message || "Terjadi kesalahan");
     } finally {
@@ -63,19 +44,8 @@ export function Login() {
     }
   };
 
-  const handleOAuth = async (provider) => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-      });
-      if (error) throw error;
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   return (
-    <div className="flex flex-col min-h-screen p-4 relative overflow-hidden bg-neutral-50">
+    <div className="flex flex-col min-h-screen p-4 relative overflow-hidden bg-white">
       {/* Ilustrasi 3D Anak */}
       <div className="absolute top-0 left-0 w-full h-auto pointer-events-none z-0">
         <img src={imgLogin} alt="Ilustrasi Anak" className="w-full h-auto object-cover rounded-b-[40px]" />
@@ -98,23 +68,23 @@ export function Login() {
       </header>
 
       {/* Tab Switcher */}
-      <div className="flex p-1 bg-[#F5F0EA] rounded-full mb-8 z-10 relative">
+      <div className="flex p-1 bg-primary-50 rounded-[12px] mb-8 z-10 relative">
         <button
           type="button"
-          onClick={() => { setActiveTab('masuk'); setError(null); setMessage(null); }}
-          className={`flex-1 py-2.5 text-base rounded-full transition-all duration-200 ${activeTab === 'masuk'
-            ? 'bg-white shadow-sm font-semibold text-primary-800'
-            : 'bg-transparent font-medium text-neutral-400'
+          onClick={() => { setActiveTab('masuk'); setError(null); }}
+          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 ${activeTab === 'masuk'
+            ? 'bg-white border-2 border-primary-100 font-semibold text-primary-800'
+            : 'bg-transparent border-none font-medium text-neutral-400'
             }`}
         >
           Masuk
         </button>
         <button
           type="button"
-          onClick={() => { setActiveTab('daftar'); setError(null); setMessage(null); }}
-          className={`flex-1 py-2.5 text-base rounded-full transition-all duration-200 ${activeTab === 'daftar'
-            ? 'bg-white shadow-sm font-semibold text-primary-800'
-            : 'bg-transparent font-medium text-neutral-400'
+          onClick={() => { setActiveTab('daftar'); setError(null); }}
+          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 ${activeTab === 'daftar'
+            ? 'bg-white border-2 border-primary-100 font-semibold text-primary-800'
+            : 'bg-transparent border-none font-medium text-neutral-400'
             }`}
         >
           Daftar
@@ -128,14 +98,9 @@ export function Login() {
             {error}
           </div>
         )}
-        {message && (
-          <div className="mb-4 p-3 bg-nakooGreen-50 text-nakooGreen-600 text-sm rounded-xl border border-nakooGreen-200">
-            {message}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-          <div className="bg-white p-[20px] flex flex-col gap-[12px] rounded-3xl shadow-sm">
+          <div className="bg-white p-[20px] flex flex-col gap-[12px] rounded-3xl">
             {activeTab === 'daftar' && (
               <Input
                 icon={UserIcon}
@@ -172,15 +137,9 @@ export function Login() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-
-            {activeTab === 'masuk' && (
-              <div className="flex justify-end mt-1">
-                <a href="#" className="text-sm font-medium text-primary-500">Lupa Password?</a>
-              </div>
-            )}
           </div>
 
-          <div className="mt-auto mb-8 pt-8">
+          <div className="mt-[32px] mb-8">
             <Button
               type="submit"
               disabled={loading}
@@ -195,25 +154,19 @@ export function Login() {
               <div className="flex-1 h-px bg-neutral-200"></div>
             </div>
 
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="auth"
-                fullWidth={false}
-                className="flex-1 font-bold"
-                onClick={() => handleOAuth('google')}
-              >
-                <span className="text-xl mr-2">G</span> Google
+            <div className="flex gap-4">
+              <Button type="button" variant="auth" fullWidth={false} className="flex-1">
+                Google
               </Button>
-              <Button
-                type="button"
-                variant="auth"
-                fullWidth={false}
-                className="flex-1 font-bold"
-                onClick={() => handleOAuth('apple')}
-              >
-                <span className="text-xl mr-2">🍏</span> Apple
+              <Button type="button" variant="auth" fullWidth={false} className="flex-1">
+                Apple
               </Button>
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <Link to="/explore/menu" className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors">
+                Lewati & Eksplor Resep →
+              </Link>
             </div>
           </div>
         </form>

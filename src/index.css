@@ -12,40 +12,40 @@
   --color-primary-800: #7E5E28;
   --color-primary-900: #4C3818;
 
-  --color-nakooGreen-50: #F2F7F0;
-  --color-nakooGreen-100: #E5EFE2;
-  --color-nakooGreen-200: #CCDDC5;
-  --color-nakooGreen-300: #B2CCA8;
-  --color-nakooGreen-400: #99BB8B;
-  --color-nakooGreen-500: #7DAA6D;
-  --color-nakooGreen-600: #719962;
-  --color-nakooGreen-700: #58774C;
-  --color-nakooGreen-800: #3F5536;
-  --color-nakooGreen-900: #263321;
+  --color-nakoo-green-50: #F2F7F0;
+  --color-nakoo-green-100: #E5EFE2;
+  --color-nakoo-green-200: #CCDDC5;
+  --color-nakoo-green-300: #B2CCA8;
+  --color-nakoo-green-400: #99BB8B;
+  --color-nakoo-green-500: #7DAA6D;
+  --color-nakoo-green-600: #719962;
+  --color-nakoo-green-700: #58774C;
+  --color-nakoo-green-800: #3F5536;
+  --color-nakoo-green-900: #263321;
 
-  --color-nakooRed-50: #FDF4F2;
-  --color-nakooRed-100: #F9E4DE;
-  --color-nakooRed-200: #F2C4B8;
-  --color-nakooRed-300: #EBA493;
-  --color-nakooRed-400: #DE8F7B;
-  --color-nakooRed-500: #D0846E;
-  --color-nakooRed-600: #BB7763;
-  --color-nakooRed-700: #925D4D;
-  --color-nakooRed-800: #684237;
-  --color-nakooRed-900: #3E2821;
+  --color-nakoo-red-50: #FDF4F2;
+  --color-nakoo-red-100: #F9E4DE;
+  --color-nakoo-red-200: #F2C4B8;
+  --color-nakoo-red-300: #EBA493;
+  --color-nakoo-red-400: #DE8F7B;
+  --color-nakoo-red-500: #D0846E;
+  --color-nakoo-red-600: #BB7763;
+  --color-nakoo-red-700: #925D4D;
+  --color-nakoo-red-800: #684237;
+  --color-nakoo-red-900: #3E2821;
 
-  --color-nakooBlue-50: #EEF4F8;
-  --color-nakooBlue-100: #D6E5EF;
-  --color-nakooBlue-200: #A8C6DD;
-  --color-nakooBlue-300: #7AA6CB;
-  --color-nakooBlue-400: #629CC1;
-  --color-nakooBlue-500: #5C95B9;
-  --color-nakooBlue-600: #5386A7;
-  --color-nakooBlue-700: #406882;
-  --color-nakooBlue-800: #2E4B5C;
-  --color-nakooBlue-900: #1C2D37;
+  --color-nakoo-blue-50: #EEF4F8;
+  --color-nakoo-blue-100: #D6E5EF;
+  --color-nakoo-blue-200: #A8C6DD;
+  --color-nakoo-blue-300: #7AA6CB;
+  --color-nakoo-blue-400: #629CC1;
+  --color-nakoo-blue-500: #5C95B9;
+  --color-nakoo-blue-600: #5386A7;
+  --color-nakoo-blue-700: #406882;
+  --color-nakoo-blue-800: #2E4B5C;
+  --color-nakoo-blue-900: #1C2D37;
 
-  --color-nakooIcon: #C4654A;
+  --color-nakoo-icon: #C4654A;
 
   /* Neutral palette uses Tailwind's default neutral (Warm Gray), we just redefine some for consistency if needed. 
      Tailwind v4 already provides neutral. We will rely on default neutral colors. */

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { api } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
@@ -44,7 +44,7 @@ function ChipSelect({ options, selected, onChange }) {
 }
 
 export function SetupProfile() {
-  const { user, refreshProfile } = useAuth();
+  const { refreshProfile } = useAuth();
   const navigate = useNavigate();
   
   const [childName, setChildName] = useState('');
@@ -87,21 +87,15 @@ export function SetupProfile() {
     setError(null);
 
     try {
-      const { error } = await supabase.from('child_profiles').insert({
-        user_id: user.id,
+      await api.post('/api/child-profiles', {
         child_name: childName,
         birth_date: birthDate,
         alergies: alergies,
         focus_skills: skills,
         available_materials: materials
       });
-
-      if (error) throw error;
       
-      // Update context profile
       await refreshProfile();
-      
-      // Ke home
       navigate('/home', { replace: true });
 
     } catch (err) {
@@ -123,7 +117,7 @@ export function SetupProfile() {
       </header>
 
       {error && (
-        <div className="mb-6 p-3 bg-nakooRed-50 text-nakooRed-500 text-sm rounded-xl border border-nakooRed-200">
+        <div className="mb-6 p-3 bg-nakoo-red-50 text-nakoo-red-500 text-sm rounded-xl border border-nakoo-red-200">
           {error}
         </div>
       )}

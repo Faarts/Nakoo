@@ -1,71 +1,69 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabaseClient';
+import { api } from './api';
 
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Ambil session saat ini
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Listen pada perubahan state auth (login, logout, dsb)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = async (userId) => {
+  const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('child_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-        
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 adalah error "row not found", yang wajar jika baru register
-        console.error('Error fetching profile:', error);
+      if (import.meta.env.VITE_BYPASS_AUTH === 'true') {
+        setProfile({ 
+          id: 'bypass-profile', 
+          child_name: 'Bypass Child', 
+          birth_date: '2025-01-01', 
+          alergies: '[]', 
+          focus_skills: '[]', 
+          available_materials: '[]' 
+        });
+        return;
       }
-      
-      setProfile(data || null);
-    } catch (err) {
-      console.error(err);
+
+      const { profile } = await api.get('/api/child-profiles');
+      setProfile(profile || null);
+    } catch {
+      setProfile(null);
+    }
+  };
+
+  const refreshAuth = async () => {
+    try {
+      if (import.meta.env.VITE_BYPASS_AUTH === 'true') {
+        setUser({ id: 'bypass-id', name: 'Dev Bypass User', email: 'dev@nakoo.app' });
+        await fetchProfile();
+        setLoading(false);
+        return;
+      }
+
+      const { user } = await api.get('/api/auth/me');
+      setUser(user);
+      await fetchProfile();
+    } catch {
+      setUser(null);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { refreshAuth(); }, []);
+
   const value = {
-    session,
     user,
     profile,
     loading,
-    refreshProfile: () => user && fetchProfile(user.id)
+    refreshAuth,
+    refreshProfile: fetchProfile,
+    logout: async () => {
+      await api.post('/api/auth/logout');
+      setUser(null);
+      setProfile(null);
+    },
   };
 
   return (
