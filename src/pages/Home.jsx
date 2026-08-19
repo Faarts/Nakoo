@@ -15,20 +15,20 @@ export function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#F2F8F7] to-[#FAF9F6]">
-        <div className="absolute top-6 left-6 z-10">
-          <h1 className="text-[32px] leading-tight font-medium text-neutral-800 max-w-[300px]">
+        <div className="absolute top-24 left-6 z-10">
+          <h1 className="text-[28px] leading-tight font-medium text-neutral-800 max-w-[300px]">
             Karena setiap si kecil<br />tumbuh <span className="text-nakooGreen-500 font-semibold">berbeda</span>
           </h1>
         </div>
 
         {/* Mom & Child Illustration */}
-        <div className="w-full pt-12 relative z-0 flex justify-center">
-          <img src={homeHeroImg} alt="Ilustrasi Ibu & Anak" className="w-full h-auto object-cover" />
+        <div className="w-full  relative z-0 flex justify-center">
+          <img src={homeHeroImg} alt="Ilustrasi Ibu & Anak" className="w-full h-500px] object-cover" />
         </div>
       </section>
 
       {/* Menu Makan Pilihan */}
-      <section className="mb-8">
+      <section className="mb-8 mt-4">
         <div className="flex justify-between items-center px-6 mb-4">
           <h2 className="text-base font-semibold text-neutral-800">Menu makan pilihan</h2>
           <Link to="/explore/menu" className="text-neutral-400 hover:text-neutral-600">
