@@ -5,6 +5,7 @@ import { useAuth } from '../lib/AuthContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Check } from 'lucide-react';
+import { calculateAge } from '../lib/utils';
 
 const ALERGIES_OPTIONS = ['Susu Sapi', 'Telur', 'Kacang', 'Seafood', 'Gluten', 'Kedelai'];
 const SKILLS_OPTIONS = ['Motorik Kasar', 'Motorik Halus', 'Kognitif', 'Bahasa', 'Sosial'];
@@ -55,24 +56,6 @@ export function SetupProfile() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const calculateAge = (dateString) => {
-    if (!dateString) return '';
-    const birth = new Date(dateString);
-    const today = new Date();
-    
-    let months = (today.getFullYear() - birth.getFullYear()) * 12;
-    months -= birth.getMonth();
-    months += today.getMonth();
-    
-    if (months < 12) {
-      return `${months} bulan`;
-    }
-    
-    const years = Math.floor(months / 12);
-    const remainingMonths = months % 12;
-    return remainingMonths === 0 ? `${years} tahun` : `${years} thn ${remainingMonths} bln`;
-  };
 
   const ageStr = calculateAge(birthDate);
 

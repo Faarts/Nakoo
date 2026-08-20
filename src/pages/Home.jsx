@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/AuthContext';
+import { api } from '../lib/api';
+import { calculateAge } from '../lib/utils';
 import { TopBar } from '../components/TopBar';
 import { Button } from '../components/Button';
 import {
@@ -20,23 +23,120 @@ import { Badge } from '../components/Badge';
 
 export function Home() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+
+  const [dailyPlan, setDailyPlan] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchDailyPlan();
+    }
+  }, [user]);
+
+  const fetchDailyPlan = async () => {
+    setLoadingPlan(true);
+    try {
+      const res = await api.get('/api/daily-plans/today');
+      setDailyPlan(res.plan);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingPlan(false);
+    }
+  };
+
+  const handleGeneratePlan = async () => {
+    setGenerating(true);
+    try {
+      await api.post('/api/daily-plans/generate');
+      await fetchDailyPlan();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const childAgeStr = profile?.birth_date ? calculateAge(profile.birth_date) : '';
+
   return (
     <div className="flex flex-col min-h-full bg-[#FFFBF8] pb-20">
-      <TopBar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#F2F8F7] to-[#FAF9F6]">
-        <div className="absolute top-24 left-6 z-10">
-          <h1 className="text-[28px] leading-tight font-medium text-neutral-800 max-w-[300px]">
-            Karena setiap si kecil<br />tumbuh <span className="text-nakoo-green-500 font-semibold">berbeda</span>
-          </h1>
-        </div>
+      {/* Hero Section - Public */}
+      {!user && (
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#F2F8F7] to-[#FAF9F6]">
+          <div className="absolute top-24 left-6 z-10">
+            <h1 className="text-[28px] leading-tight font-medium text-neutral-800 max-w-[300px]">
+              Karena setiap si kecil<br />tumbuh <span className="text-nakoo-green-500 font-semibold">berbeda</span>
+            </h1>
+          </div>
 
-        {/* Mom & Child Illustration */}
-        <div className="w-full  relative z-0 flex justify-center">
-          <img src={homeHeroImg} alt="Ilustrasi Ibu & Anak" className="w-full h-full object-cover" />
-        </div>
-      </section>
+          <div className="w-full relative z-0 flex justify-center">
+            <img src={homeHeroImg} alt="Ilustrasi Ibu & Anak" className="w-full h-full object-cover" />
+          </div>
+        </section>
+      )}
+
+      {/* Hero Section - Logged In */}
+      {user && (
+        <section className="px-6 pt-6 pb-4">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-neutral-800 leading-tight">
+              Rencana hari ini untuk {profile?.child_name || 'Si Kecil'}
+            </h1>
+            <p className="text-neutral-500 text-sm mt-1">Usia {childAgeStr}</p>
+          </div>
+
+          {loadingPlan ? (
+            <div className="bg-white rounded-2xl p-6 shadow-sm flex items-center justify-center min-h-[160px]">
+              <p className="text-neutral-400">Memuat rencana...</p>
+            </div>
+          ) : dailyPlan && dailyPlan.slots && dailyPlan.slots.length > 0 ? (
+            <div className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-neutral-100">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold text-neutral-800">Ringkasan Jadwal</h2>
+                <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2.5 py-1 rounded-full">
+                  Hari Ini
+                </span>
+              </div>
+
+              <div className="space-y-3 mb-5">
+                {dailyPlan.slots.map((slot, idx) => (
+                  <div key={idx} className="flex gap-3 items-start">
+                    <div className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center shrink-0 border border-neutral-100">
+                      {slot.type === 'meal' ? <Salad className="w-5 h-5 text-[#B9411A]" /> : <Puzzle className="w-5 h-5 text-[#2C6E91]" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-medium text-neutral-400">{slot.time}</span>
+                        <span className="text-[10px] font-semibold tracking-wide uppercase text-neutral-400">• {slot.type === 'meal' ? 'MAKAN' : 'MAIN'}</span>
+                      </div>
+                      <p className="text-sm font-medium text-neutral-800 leading-snug">{slot.item?.title || 'Item'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button onClick={() => navigate('/my-page')} variant="secondary" className="w-full">
+                Lihat rencana lengkap
+              </Button>
+            </div>
+          ) : (
+            <div className="bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-neutral-100 text-center flex flex-col items-center">
+              <div className="w-16 h-16 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center mb-4">
+                <Calendar className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-semibold text-neutral-800 mb-2">Belum ada rencana hari ini</h3>
+              <p className="text-sm text-neutral-500 mb-6">Mulai buat rencana menu dan aktivitas yang sesuai dengan perkembangan si kecil yuk!</p>
+              <Button onClick={handleGeneratePlan} disabled={generating} className="w-full">
+                {generating ? 'Membuat rencana...' : 'Buat rencana hari ini'}
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Menu Makan Pilihan */}
       <section className="mb-8 mt-4">
@@ -168,23 +268,25 @@ export function Home() {
       </section>
 
       {/* CTA Banner */}
-      <section className="px-6 mb-10">
-        <div className="bg-gradient-to-br from-primary-50 to-nakooBlue-100 rounded-[32px] p-5 flex flex-col items-center text-center relative overflow-hidden">
-          {/* Placeholder Bowl */}
-          <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2" />
+      {!user && (
+        <section className="px-6 mb-10">
+          <div className="bg-gradient-to-br from-primary-50 to-nakooBlue-100 rounded-[32px] p-5 flex flex-col items-center text-center relative overflow-hidden">
+            {/* Placeholder Bowl */}
+            <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2" />
 
-          <h2 className="text-xl font-semibold text-neutral-800 mb-3 leading-snug">
-            Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakooGreen-600">si kecil</span>
-          </h2>
-          <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
-            Isi profil singkat si kecil, dan Nakoo bantu susun rencana harian yang pas setiap hari
-          </p>
+            <h2 className="text-xl font-semibold text-neutral-800 mb-3 leading-snug">
+              Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakooGreen-600">si kecil</span>
+            </h2>
+            <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
+              Isi profil singkat si kecil, dan Nakoo bantu susun rencana harian yang pas setiap hari
+            </p>
 
-          <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2">
-            Daftar Sekarang <span className="font-bold text-lg leading-none">→</span>
-          </Button>
-        </div>
-      </section>
+            <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2">
+              Daftar Sekarang <span className="font-bold text-lg leading-none">→</span>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Kenapa Nakoo? */}
       <section className="px-6 mb-10">

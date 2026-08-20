@@ -56,6 +56,14 @@ CREATE TABLE IF NOT EXISTS daily_plans (
   date TEXT NOT NULL,
   slots TEXT DEFAULT '[]'
 );
+CREATE TABLE IF NOT EXISTS favorites (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  item_type TEXT NOT NULL,
+  item_id TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, item_type, item_id)
+);
 `);
 
 const hash = (p) => crypto.createHash("sha256").update(p).digest("hex");
@@ -85,11 +93,27 @@ if (!db.prepare("SELECT id FROM child_profiles WHERE user_id = 'bypass-id'").get
 const existingRecipesCount = db.prepare("SELECT count(*) as c FROM recipes").get().c;
 if (existingRecipesCount === 0) {
   const insertRecipe = db.prepare("INSERT INTO recipes (id, title, prep_time, allergens, age_range, type) VALUES (?,?,?,?,?,?)");
+  // 6-12 months
   insertRecipe.run(uuid(), "Bubur Oat Apel", 15, '[]', '6-12', 'breakfast');
   insertRecipe.run(uuid(), "Nasi Tim Ayam", 30, '[]', '6-12', 'lunch');
+  insertRecipe.run(uuid(), "Puree Pisang Alpukat", 10, '[]', '6-12', 'snack');
+  insertRecipe.run(uuid(), "Sup Sayur Bayam Halus", 20, '[]', '6-12', 'dinner');
+  insertRecipe.run(uuid(), "Puree Brokoli Wortel", 15, '[]', '6-12', 'lunch');
+  
+  // 12-24 months
   insertRecipe.run(uuid(), "Pancake Pisang", 20, '["telur"]', '12-24', 'snack');
   insertRecipe.run(uuid(), "Sup Sayur Bakso", 25, '[]', '12-24', 'dinner');
+  insertRecipe.run(uuid(), "Nasi Goreng Sayur", 15, '[]', '12-24', 'breakfast');
+  insertRecipe.run(uuid(), "Macaroni Schotel", 35, '["susu sapi", "telur", "gluten"]', '12-24', 'lunch');
+  insertRecipe.run(uuid(), "Smoothie Buah Naga", 10, '["susu sapi"]', '12-24', 'snack');
+  
+  // 24-36 months
   insertRecipe.run(uuid(), "Omelet Sayur", 15, '["telur"]', '24-36', 'breakfast');
+  insertRecipe.run(uuid(), "Ayam Teriyaki Nasi Hangat", 30, '["kedelai"]', '24-36', 'lunch');
+  insertRecipe.run(uuid(), "Biskuit Gandum Susu", 5, '["gluten", "susu sapi"]', '24-36', 'snack');
+  insertRecipe.run(uuid(), "Ikan Panggang Jeruk", 25, '["seafood"]', '24-36', 'dinner');
+  insertRecipe.run(uuid(), "Sandwich Selai Kacang", 10, '["gluten", "kacang"]', '24-36', 'breakfast');
+  insertRecipe.run(uuid(), "Soto Ayam Kuah Bening", 40, '[]', '24-36', 'lunch');
 }
 
 // Seed activities
@@ -225,20 +249,95 @@ app.post("/api/daily-plans/generate", (req, res) => {
   if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
   const today = new Date().toISOString().split('T')[0];
   
-  // Basic generate logic (pick random from DB)
-  const meals = db.prepare("SELECT id FROM recipes LIMIT 3").all();
-  const acts = db.prepare("SELECT id FROM activities LIMIT 2").all();
+  const child = db.prepare("SELECT birth_date, alergies FROM child_profiles WHERE user_id = ?").get(uid);
+  let ageRange = '6-12';
+  let userAlergies = [];
+  
+  if (child) {
+    const birthDate = new Date(child.birth_date);
+    const now = new Date();
+    const months = (now.getFullYear() - birthDate.getFullYear()) * 12 + now.getMonth() - birthDate.getMonth();
+    if (months < 12) ageRange = '6-12';
+    else if (months < 24) ageRange = '12-24';
+    else ageRange = '24-36';
+    
+    userAlergies = JSON.parse(child.alergies || "[]");
+  }
+
+  const allMeals = db.prepare("SELECT id, allergens, type FROM recipes WHERE age_range = ?").all(ageRange);
+  const allActs = db.prepare("SELECT id FROM activities WHERE age_range = ?").all(ageRange);
+
+  const safeMeals = allMeals.filter(m => {
+    const mealAllergens = JSON.parse(m.allergens || "[]");
+    return !mealAllergens.some(a => userAlergies.includes(a));
+  });
+
+  let mealsToUse = safeMeals.length >= 3 ? safeMeals : allMeals;
+  if (mealsToUse.length === 0) mealsToUse = db.prepare("SELECT id, allergens, type FROM recipes LIMIT 3").all();
+
+  let actsToUse = allActs;
+  if (actsToUse.length < 2) actsToUse = db.prepare("SELECT id FROM activities LIMIT 2").all();
+
+  const shuffle = (array) => array.sort(() => 0.5 - Math.random());
+  
+  const breakfast = mealsToUse.find(m => m.type === 'breakfast') || mealsToUse[0];
+  const lunch = mealsToUse.find(m => m.type === 'lunch') || mealsToUse[1] || mealsToUse[0];
+  const dinner = mealsToUse.find(m => m.type === 'dinner') || mealsToUse[2] || mealsToUse[0];
+  const selectedMeals = [breakfast, lunch, dinner].filter(Boolean);
+  
+  const selectedActs = shuffle([...actsToUse]).slice(0, 2);
   
   const slots = [];
-  if (meals.length > 0) slots.push({ time: '07:00', type: 'meal', item_id: meals[0].id, status: 'pending' });
-  if (acts.length > 0) slots.push({ time: '09:00', type: 'activity', item_id: acts[0].id, status: 'pending' });
-  if (meals.length > 1) slots.push({ time: '12:00', type: 'meal', item_id: meals[1].id, status: 'pending' });
-  if (acts.length > 1) slots.push({ time: '15:00', type: 'activity', item_id: acts[1].id, status: 'pending' });
-  if (meals.length > 2) slots.push({ time: '18:00', type: 'meal', item_id: meals[2].id, status: 'pending' });
+  if (selectedMeals[0]) slots.push({ time: '07:00', type: 'meal', item_id: selectedMeals[0].id, status: 'pending' });
+  if (selectedActs[0]) slots.push({ time: '09:00', type: 'activity', item_id: selectedActs[0].id, status: 'pending' });
+  if (selectedMeals[1]) slots.push({ time: '12:00', type: 'meal', item_id: selectedMeals[1].id, status: 'pending' });
+  if (selectedActs[1]) slots.push({ time: '15:00', type: 'activity', item_id: selectedActs[1].id, status: 'pending' });
+  if (selectedMeals[2]) slots.push({ time: '18:00', type: 'meal', item_id: selectedMeals[2].id, status: 'pending' });
+
+  // Delete existing plan for today if any
+  db.prepare("DELETE FROM daily_plans WHERE user_id = ? AND date = ?").run(uid, today);
 
   const id = uuid();
   db.prepare("INSERT INTO daily_plans (id, user_id, date, slots) VALUES (?,?,?,?)").run(id, uid, today, JSON.stringify(slots));
   
+  res.json({ ok: true });
+});
+
+// ---- favorites ----
+app.get("/api/recipes", (req, res) => {
+  const recipes = db.prepare("SELECT * FROM recipes").all();
+  res.json({ recipes });
+});
+
+app.get("/api/favorites", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const favs = db.prepare("SELECT * FROM favorites WHERE user_id = ?").all(uid);
+  res.json({ favorites: favs });
+});
+
+app.post("/api/favorites", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const { item_type, item_id } = req.body;
+  if (!item_type || !item_id) return res.status(400).json({ error: "item_type dan item_id wajib diisi" });
+  
+  try {
+    db.prepare("INSERT INTO favorites (id, user_id, item_type, item_id) VALUES (?,?,?,?)")
+      .run(uuid(), uid, item_type, item_id);
+    res.json({ ok: true });
+  } catch (e) {
+    if (e.message.includes("UNIQUE constraint")) return res.json({ ok: true }); // Already favorited
+    res.status(500).json({ error: "Terjadi kesalahan" });
+  }
+});
+
+app.delete("/api/favorites/:type/:id", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const { type, id } = req.params;
+  
+  db.prepare("DELETE FROM favorites WHERE user_id = ? AND item_type = ? AND item_id = ?").run(uid, type, id);
   res.json({ ok: true });
 });
 

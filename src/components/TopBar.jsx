@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Menu, User, Settings, LogOut, Info, LogIn } from 'lucide-react';
+import { useAuth } from '../lib/AuthContext';
 import logo from '../assets/nako-logo.svg';
 
 export function TopBar({ className = '', isLoggedIn = true }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -20,7 +24,7 @@ export function TopBar({ className = '', isLoggedIn = true }) {
               setIsNotificationOpen(!isNotificationOpen);
               setIsMenuOpen(false);
             }}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakooGreen-600 hover:bg-neutral-50 active:scale-95 transition-all relative"
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakooGreen-600 hover:bg-neutral-50 active:scale-95 transition-all relative shadow-[inset_0_4px_12px_white]"
             aria-label="Notifikasi"
           >
             <Bell className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
@@ -89,7 +93,14 @@ export function TopBar({ className = '', isLoggedIn = true }) {
                     <span className="font-medium text-sm group-hover:translate-x-1 transition-transform duration-300">Pengaturan Akun</span>
                   </button>
                   <hr className="my-1 border-neutral-100" />
-                  <button className="flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-xl transition-all group w-full text-left">
+                  <button 
+                    onClick={async () => {
+                      setIsMenuOpen(false);
+                      await logout();
+                      navigate('/');
+                    }}
+                    className="flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-xl transition-all group w-full text-left"
+                  >
                     <div className="p-2 bg-red-50 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all group-active:scale-95 duration-300">
                       <LogOut className="w-5 h-5" />
                     </div>
@@ -97,7 +108,13 @@ export function TopBar({ className = '', isLoggedIn = true }) {
                   </button>
                 </>
               ) : (
-                <button className="flex items-center gap-3 p-3 text-nakoo-green-600 hover:bg-nakoo-green-50 rounded-xl transition-all group w-full text-left">
+                <button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/login');
+                  }}
+                  className="flex items-center gap-3 p-3 text-nakoo-green-600 hover:bg-nakoo-green-50 rounded-xl transition-all group w-full text-left"
+                >
                   <div className="p-2 bg-nakoo-green-50 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all group-active:scale-95 duration-300">
                     <LogIn className="w-5 h-5" />
                   </div>
