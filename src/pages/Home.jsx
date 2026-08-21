@@ -94,7 +94,7 @@ export function Home() {
               <p className="text-neutral-400">Memuat rencana...</p>
             </div>
           ) : dailyPlan && dailyPlan.slots && dailyPlan.slots.length > 0 ? (
-            <div className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-neutral-100">
+            <div className="bg-white rounded-[24px] p-5 shadow-card border border-neutral-100">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-neutral-800">Ringkasan Jadwal</h2>
                 <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2.5 py-1 rounded-full">
@@ -124,7 +124,7 @@ export function Home() {
               </Button>
             </div>
           ) : (
-            <div className="bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-neutral-100 text-center flex flex-col items-center">
+            <div className="bg-white rounded-[24px] p-6 shadow-card border border-neutral-100 text-center flex flex-col items-center">
               <div className="w-16 h-16 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-8 h-8" />
               </div>
@@ -148,7 +148,7 @@ export function Home() {
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
           {/* Card 1 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/food-01.png" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
@@ -159,7 +159,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 2 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/food-02.png" alt="Pasta" className="w-full h-full object-cover" />
             </div>
@@ -170,7 +170,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 3 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/food-03.png" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
@@ -181,7 +181,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 4 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/food-04.png" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
@@ -192,7 +192,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 5 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/food-05.png" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
@@ -215,7 +215,7 @@ export function Home() {
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
           {/* Card 1 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/act-01.png" alt="Main Air" className="w-full h-full object-cover" />
             </div>
@@ -225,7 +225,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 2 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/act-02.png" alt="Alpucok" className="w-full h-full object-cover" />
             </div>
@@ -235,7 +235,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 3 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/act-03.png" alt="Main Air" className="w-full h-full object-cover" />
             </div>
@@ -245,7 +245,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 4 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="/img/act-03.png" alt="Main Air" className="w-full h-full object-cover" />
             </div>
@@ -255,7 +255,7 @@ export function Home() {
             </div>
           </Link>
           {/* Card 5 */}
-          <Link to="/explore/activity" className="min-w-[160px] max-w-[160px] snap-start bg-white rounded-2xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+          <Link to="/explore/activity" className="min-w-[160px] max-w-[160px] snap-start bg-white rounded-2xl p-3 shadow-card-sm">
             <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
               <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=300&q=80" alt="Puzzle" className="w-full h-full object-cover" />
             </div>
@@ -292,7 +292,7 @@ export function Home() {
       <section className="px-6 mb-10">
         <h2 className="text-base font-semibold text-neutral-800 mb-4">Kenapa Nakoo?</h2>
         <div className="flex flex-col gap-3">
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-[0_4px_16px_rgba(196,101,74,0.04)]">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item">
             <div className="w-12 h-12 shrink-0 bg-[#FFEBDB] text-[#E58639] rounded-xl flex items-center justify-center">
               <img src={checkIcon} alt="Check Icon" className="w-6 h-6" />
             </div>
@@ -302,7 +302,7 @@ export function Home() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-[0_4px_16px_rgba(196,101,74,0.04)]">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item">
             <div className="w-12 h-12 shrink-0 bg-[#E4F1DF] text-[#437A32] rounded-xl flex items-center justify-center">
               <img src={saveIcon} alt="Save Icon" className="w-6 h-6" />
             </div>
@@ -312,7 +312,7 @@ export function Home() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-[0_4px_16px_rgba(196,101,74,0.04)]">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item">
             <div className="w-12 h-12 shrink-0 bg-[#FFDBD1] text-[#B9411A] rounded-xl flex items-center justify-center">
               <img src={tumbuhIcon} alt="Tumbuh Icon" className="w-6 h-6" />
             </div>

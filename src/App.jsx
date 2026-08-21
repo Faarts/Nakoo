@@ -8,6 +8,7 @@ import { ExploreMenu } from './pages/ExploreMenu'
 import { ExploreActivity } from './pages/ExploreActivity'
 import { MyPage } from './pages/MyPage'
 import { DesignPreview } from './pages/DesignPreview'
+import { RecipeDetail } from './pages/RecipeDetail'
 
 import { ToastProvider } from './components/Toast'
 
@@ -16,31 +17,34 @@ function App() {
     <ToastProvider>
       <AuthProvider>
         <Router>
-        <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/design" element={<DesignPreview />} />
-            
-            {/* Rute Publik dengan Layout */}
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/explore/menu" element={<ExploreMenu />} />
-              <Route path="/explore/activity" element={<ExploreActivity />} />
-            </Route>
+          <div className="mx-auto max-w-md bg-white min-h-screen relative">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/design" element={<DesignPreview />} />
 
-            {/* Protected Routes (Harus Login) */}
-            <Route element={<ProtectedRoute />}>
+              {/* Rute Publik Tanpa Layout (Full Screen) */}
+              <Route path="/explore/menu/:id" element={<RecipeDetail />} />
+
+              {/* Rute Publik dengan Layout */}
               <Route element={<Layout />}>
-                <Route path="/my-page" element={<MyPage />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/explore/menu" element={<ExploreMenu />} />
+                <Route path="/explore/activity" element={<ExploreActivity />} />
               </Route>
-            </Route>
 
-            {/* Fallback route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+              {/* Protected Routes (Harus Login) */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/my-page" element={<MyPage />} />
+                </Route>
+              </Route>
+
+              {/* Fallback route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
     </ToastProvider>
   )
 }
