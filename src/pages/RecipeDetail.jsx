@@ -4,60 +4,91 @@ import { ChevronLeft, Heart, Flame, Dna, Droplet, LayoutList, ListOrdered, MoreH
 import { DUMMY_RECIPES } from '../../.mock/recipes';
 import { useToast } from '../components/Toast';
 
-// Mock enriched data for the detail page since DUMMY_RECIPES lacks details
-const MOCK_DETAIL = {
-  description: "Indulge in layers of rich, cheesy goodness with our Cheesy Lasagna featuring tender smoked beef. This classic Italian dish is a hearty blend of savory flavors, perfectly com...",
-  calories: 320,
-  protein: 5,
-  fat: 4,
-  tags: ['9–11 bulan', 'Rebus', 'Cincang'],
-  images: [
-    'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=600',
-    'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=200',
-    'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=200',
-    'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=200',
-  ],
-  ingredients: [
-    { name: 'Lasagna Noodles', qty: '8 pcs' },
-    { name: 'Smoked Beef', qty: '1 lbs' },
-    { name: 'Marinara Sauce', qty: '2 cups' },
-    { name: 'Ricotta Cheese', qty: '1 cup' },
-    { name: 'Mozarella Cheese', qty: '1 cup' },
-    { name: 'Parmesan Cheese', qty: '1/2 cup' },
-  ],
-  steps: [
-    { title: 'Belah Alpukat', desc: 'Ambil daging alpukat yang sudah matang.' },
-    { title: 'Haluskan', desc: 'Hancurkan alpukat menggunakan garpu hingga lembut.' },
-    { title: 'Tambahkan susu UHT', desc: 'Tambahkan susu UHT secukupnya agar makin anjay' },
-  ]
+// Contextual recipe details map
+const RECIPE_DETAILS = {
+  r1: {
+    description: "Minuman puree alpukat kocok lezat dan bergizi tinggi, kaya akan lemak sehat (asam folat) yang sangat baik untuk perkembangan otak dan daya tahan tubuh si kecil.",
+    calories: 140,
+    protein: 3,
+    fat: 8,
+    tags: ['6–12 bulan', 'Lumat', 'Camilan'],
+    images: ['/img/food-01.png', '/img/food-03.png', '/img/food-05.png', '/img/food-07.png'],
+    ingredients: [
+      { name: 'Alpukat Mentega Matang', qty: '1/2 buah' },
+      { name: 'ASI / Susu Formula / UHT', qty: '50 ml' },
+      { name: 'Keju parut lembut', qty: '1 sdt' }
+    ],
+    steps: [
+      { title: 'Belah Alpukat', desc: 'Ambil daging alpukat matang dengan sendok bersih.' },
+      { title: 'Haluskan Sesuai Tekstur', desc: 'Hancurkan alpukat menggunakan garpu atau saringan kawat hingga lembut.' },
+      { title: 'Tambahkan Susu & Keju', desc: 'Campurkan susu sedikit demi sedikit dan taburi sedikit parutan keju di atasnya.' }
+    ]
+  },
+  r2: {
+    description: "Pasta empuk dengan saus cincang daging sapi dan sayuran bergizi. Mengandung zat besi dan protein tinggi untuk pertumbuhan optimal si kecil.",
+    calories: 280,
+    protein: 12,
+    fat: 6,
+    tags: ['12–24 bulan', 'Rebus', 'Makan Siang'],
+    images: ['/img/food-02.png', '/img/food-04.png', '/img/food-06.png', '/img/food-08.png'],
+    ingredients: [
+      { name: 'Pasta Makaroni / Fusilli', qty: '50 gr' },
+      { name: 'Daging Sapi Cincang', qty: '40 gr' },
+      { name: 'Wortel & Tomat Cincang', qty: '2 sdm' },
+      { name: 'Minyak Kelapa / Canola', qty: '1 sdt' }
+    ],
+    steps: [
+      { title: 'Rebus Pasta', desc: 'Rebus pasta hingga matang dan sangat empuk untuk si kecil.' },
+      { title: 'Tumis Daging & Sayur', desc: 'Tumis daging cincang bersama wortel dan tomat sampai harum dan matang.' },
+      { title: 'Campur & Sajikan', desc: 'Campurkan saus daging ke dalam pasta rebus, aduk rata dan sajikan hangat.' }
+    ]
+  }
+};
+
+const getDefaultDetail = (recipe, id) => {
+  const num = (parseInt(id?.replace('r', '') || '1') % 8) || 1;
+  const numStr = num.toString().padStart(2, '0');
+  return {
+    description: `${recipe?.title || 'Menu bernutrisi'} dirancang khusus sesuai tahapan usia si kecil dengan gizi seimbang untuk mendukung tumbuh kembang hariannya.`,
+    calories: 180,
+    protein: 6,
+    fat: 5,
+    tags: [`${recipe?.age_range || '12-24'} bln`, 'Gizi Seimbang', recipe?.type || 'Menu'],
+    images: [`/img/food-${numStr}.png`, '/img/food-01.png', '/img/food-02.png', '/img/food-03.png'],
+    ingredients: [
+      { name: 'Bahan Utama Pilihan', qty: '1 porsi' },
+      { name: 'Sayuran Segar', qty: 'Secukupnya' },
+      { name: 'Kaldu Homemade', qty: '50 ml' }
+    ],
+    steps: [
+      { title: 'Persiapan Bahan', desc: 'Cuci bersih semua bahan dan potong sesuai tekstur usia si kecil.' },
+      { title: 'Proses Memasak', desc: 'Masak dengan api sedang hingga semua bahan matang sempurna dan empuk.' },
+      { title: 'Penyajian', desc: 'Sajikan selagi hangat dan pastikan suhunya aman sebelum diberikan ke si kecil.' }
+    ]
+  };
 };
 
 export function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('bahan');
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Find base recipe from mock, fallback to dummy
-  const baseRecipe = DUMMY_RECIPES.find(r => r.id === id) || { title: 'Alpucok Alpukat Kocok' };
+  const baseRecipe = DUMMY_RECIPES.find(r => r.id === id) || { id, title: 'Menu Bernutrisi', age_range: '12-24' };
   
-  // Merge base recipe with mock details
-  const recipe = { ...baseRecipe, ...MOCK_DETAIL };
+  // Merge base recipe with contextual details
+  const detail = RECIPE_DETAILS[id] || getDefaultDetail(baseRecipe, id);
+  const recipe = { ...baseRecipe, ...detail };
 
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    addToast({
-      title: isFavorite ? 'Dihapus dari favorit' : 'Disimpan ke favorit',
-      type: 'info'
-    });
+    showToast(isFavorite ? 'Dihapus dari favorit' : 'Disimpan ke favorit', 'info');
   };
 
   const handleAddToPlan = () => {
-    addToast({
-      title: 'Berhasil ditambahkan ke rencana hari ini',
-      type: 'success'
-    });
+    showToast('Berhasil ditambahkan ke rencana hari ini', 'success');
     // Eventually this will trigger an API call to update the daily plan
   };
 

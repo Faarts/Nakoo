@@ -10,7 +10,7 @@ import { Badge } from '../components/Badge';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
-import { Heart, Clock, AlertTriangle, SlidersHorizontal, ArrowRight } from 'lucide-react';
+import { Heart, AlertTriangle, SlidersHorizontal, ArrowRight } from 'lucide-react';
 import { DUMMY_RECIPES } from '../../.mock/recipes';
 import category01 from '../assets/img/category 01.png';
 import category02 from '../assets/img/category 02.png';
@@ -32,6 +32,12 @@ const categories = [
   { label: 'Cemilan', value: 'snack', icon: category04 },
   { label: 'Makan Malam', value: 'dinner', icon: category05 }
 ];
+
+const getRecipeImage = (recipe, idx) => {
+  if (recipe?.image) return recipe.image;
+  const num = ((idx % 8) + 1).toString().padStart(2, '0');
+  return `/img/food-${num}.png`;
+};
 
 export function ExploreMenu() {
   const { user, profile } = useAuth();
@@ -67,8 +73,8 @@ export function ExploreMenu() {
         if (import.meta.env.VITE_USE_MOCK === 'true') {
           setRecipes(DUMMY_RECIPES);
         } else {
-          const { recipes } = await api.get('/api/recipes');
-          setRecipes(recipes || []);
+          const res = await api.get('/api/recipes');
+          setRecipes(res?.recipes && res.recipes.length > 0 ? res.recipes : DUMMY_RECIPES);
         }
 
         if (user) {
@@ -77,6 +83,7 @@ export function ExploreMenu() {
         }
       } catch (err) {
         console.error("Failed to fetch recipes", err);
+        setRecipes(DUMMY_RECIPES);
       } finally {
         setLoading(false);
       }
@@ -145,15 +152,27 @@ export function ExploreMenu() {
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white cursor-pointer"
             aria-label="Filter"
           >
-            <SlidersHorizontal className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
+            <SlidersHorizontal className="w-5 h-5 text-nakoo-green-700" strokeWidth={2.5} />
+            {advancedFilters && Object.values(advancedFilters).some(v => Array.isArray(v) ? v.length > 0 : !!v) && (
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-nakoo-red-500 rounded-full border border-white"></span>
+            )}
           </button>
         </div>
 
+        {/* Filter Usia Bar */}
+        <div className="pl-4 pb-2">
+          <FilterBar
+            filters={ageFilters}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+        </div>
+
         {/* Kategori Section */}
-        <div className="mb-2 mt-4">
+        <div className="mb-2 mt-2">
           <h2 className="text-base font-bold text-neutral-800 mb-1 px-4">Kategori</h2>
           <div className="flex overflow-x-auto gap-4 py-2 px-4 scrollbar-hide">
             {categories.map((cat) => {
@@ -217,17 +236,23 @@ export function ExploreMenu() {
                   <ArrowRight className="w-5 h-5 text-neutral-600" />
                 </div>
                 <div className="flex overflow-x-auto gap-4 px-4 pb-2 scrollbar-hide">
-                  {filteredRecipes.slice(0, 2).map(recipe => (
+                  {filteredRecipes.slice(0, 2).map((recipe, idx) => (
                     <Link key={`rec-${recipe.id}`} to={`/explore/menu/${recipe.id}`} className="shrink-0 w-[280px]">
-                      <Card className="!p-0 overflow-hidden border border-neutral-100 shadow-card rounded-2xl h-full">
-                        <div className="aspect-[16/9] bg-neutral-100 relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-amber-100 opacity-60" />
+                      <Card className="!p-0 overflow-hidden border border-neutral-100 shadow-card rounded-2xl h-full group hover:shadow-md transition-shadow">
+                        <div className="aspect-[16/9] bg-neutral-100 relative overflow-hidden">
+                          <img 
+                            src={getRecipeImage(recipe, idx)} 
+                            alt={recipe.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                         </div>
                         <div className="p-3">
                           <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-1">{recipe.title}</h3>
                           <div className="flex gap-2">
                             <Badge variant="yellow" className="bg-[#FFF5EB] text-orange-700 !px-2 !py-0.5 font-medium">{recipe.age_range} bulan</Badge>
-                            <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-medium">+3</Badge>
+                            <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-medium">{recipe.type || 'Menu'}</Badge>
                           </div>
                         </div>
                       </Card>
@@ -242,16 +267,21 @@ export function ExploreMenu() {
               <div className="px-4">
                 <h2 className="text-base font-bold text-neutral-800 mb-3">Makanan Hari Ini</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {filteredRecipes.map(recipe => {
+                  {filteredRecipes.map((recipe, idx) => {
                     const recipeAllergens = JSON.parse(recipe.allergens || "[]");
                     const hasAllergenWarning = recipeAllergens.some(a => childAllergies.includes(a));
                     const isFav = favorites.some(f => f.item_type === 'meal' && f.item_id === recipe.id);
 
                     return (
                       <Link key={recipe.id} to={`/explore/menu/${recipe.id}`} className="block h-full">
-                        <Card className="!p-0 overflow-hidden group flex flex-col h-full border border-neutral-100 shadow-card hover:shadow-md rounded-2xl">
-                          <div className="aspect-[4/3] bg-neutral-100 relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 opacity-50" />
+                        <Card className="!p-0 overflow-hidden group flex flex-col h-full border border-neutral-100 shadow-card hover:shadow-md rounded-2xl transition-all">
+                          <div className="aspect-[4/3] bg-neutral-100 relative overflow-hidden">
+                            <img 
+                              src={getRecipeImage(recipe, idx)} 
+                              alt={recipe.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                              loading="lazy"
+                            />
                             <button
                               type="button"
                               onClick={(e) => {
@@ -259,7 +289,7 @@ export function ExploreMenu() {
                                 e.stopPropagation();
                                 toggleFavorite(recipe);
                               }}
-                              className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-white/80 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 active:scale-90 transition-all z-10"
+                              className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 active:scale-90 transition-all z-10 shadow-sm"
                               aria-label={isFav ? 'Hapus dari favorit' : 'Simpan ke favorit'}
                             >
                               <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />

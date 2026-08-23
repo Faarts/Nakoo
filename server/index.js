@@ -303,10 +303,126 @@ app.post("/api/daily-plans/generate", (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- favorites ----
+app.put("/api/daily-plans/slot-status", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const { date, index, status } = req.body;
+  if (!date || index === undefined || !status) return res.status(400).json({ error: "date, index, dan status wajib diisi" });
+
+  const plan = db.prepare("SELECT * FROM daily_plans WHERE user_id = ? AND date = ?").get(uid, date);
+  if (!plan) return res.status(404).json({ error: "Rencana tidak ditemukan" });
+
+  const slots = JSON.parse(plan.slots || "[]");
+  if (index < 0 || index >= slots.length) return res.status(400).json({ error: "Index slot tidak valid" });
+  
+  slots[index].status = status;
+  db.prepare("UPDATE daily_plans SET slots = ? WHERE id = ?").run(JSON.stringify(slots), plan.id);
+  
+  res.json({ ok: true, slots });
+});
+
+app.get("/api/daily-plans", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const date = req.query.date || new Date().toISOString().split('T')[0];
+  const plan = db.prepare("SELECT * FROM daily_plans WHERE user_id = ? AND date = ?").get(uid, date);
+  
+  if (!plan) return res.json({ plan: null });
+
+  const slots = JSON.parse(plan.slots || "[]");
+  const hydratedSlots = slots.map(s => {
+    let itemDetails = null;
+    if (s.type === 'meal') {
+      itemDetails = db.prepare("SELECT id, title, prep_time as duration FROM recipes WHERE id = ?").get(s.item_id);
+    } else {
+      itemDetails = db.prepare("SELECT id, title, duration FROM activities WHERE id = ?").get(s.item_id);
+    }
+    return { ...s, item: itemDetails || null };
+  });
+
+  res.json({ plan: { ...plan, slots: hydratedSlots } });
+});
+
+app.post("/api/daily-plans/regenerate-slot", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const { date, index } = req.body;
+  if (!date || index === undefined) return res.status(400).json({ error: "date dan index wajib diisi" });
+
+  const plan = db.prepare("SELECT * FROM daily_plans WHERE user_id = ? AND date = ?").get(uid, date);
+  if (!plan) return res.status(404).json({ error: "Rencana tidak ditemukan" });
+
+  const slots = JSON.parse(plan.slots || "[]");
+  if (index < 0 || index >= slots.length) return res.status(400).json({ error: "Index slot tidak valid" });
+  
+  const slotToChange = slots[index];
+  
+  // Logic to find a new item
+  const child = db.prepare("SELECT birth_date, alergies FROM child_profiles WHERE user_id = ?").get(uid);
+  let ageRange = '6-12';
+  let userAlergies = [];
+  
+  if (child) {
+    const birthDate = new Date(child.birth_date);
+    const now = new Date();
+    const months = (now.getFullYear() - birthDate.getFullYear()) * 12 + now.getMonth() - birthDate.getMonth();
+    if (months < 12) ageRange = '6-12';
+    else if (months < 24) ageRange = '12-24';
+    else ageRange = '24-36';
+    userAlergies = JSON.parse(child.alergies || "[]");
+  }
+
+  const shuffle = (array) => array.sort(() => 0.5 - Math.random());
+  
+  if (slotToChange.type === 'meal') {
+    const allMeals = db.prepare("SELECT id, allergens, type FROM recipes WHERE age_range = ?").all(ageRange);
+    const safeMeals = allMeals.filter(m => {
+      const mealAllergens = JSON.parse(m.allergens || "[]");
+      return !mealAllergens.some(a => userAlergies.includes(a));
+    });
+    // Filter for the same meal type (breakfast, lunch, dinner)
+    // Based on the index or time we could guess the type, but let's just use the current item's type if possible
+    // Wait, the slot doesn't store meal type, just "meal". Let's fetch the current item's type from DB
+    const currentRecipe = db.prepare("SELECT type FROM recipes WHERE id = ?").get(slotToChange.item_id);
+    const mealType = currentRecipe ? currentRecipe.type : 'lunch';
+    
+    let candidateMeals = safeMeals.filter(m => m.type === mealType && m.id !== slotToChange.item_id);
+    if (candidateMeals.length === 0) candidateMeals = safeMeals.filter(m => m.id !== slotToChange.item_id);
+    if (candidateMeals.length === 0) candidateMeals = db.prepare("SELECT id FROM recipes WHERE id != ? LIMIT 3").all(slotToChange.item_id);
+    
+    if (candidateMeals.length > 0) {
+      slotToChange.item_id = shuffle(candidateMeals)[0].id;
+    }
+  } else {
+    const allActs = db.prepare("SELECT id FROM activities WHERE age_range = ? AND id != ?").all(ageRange, slotToChange.item_id);
+    let candidateActs = allActs;
+    if (candidateActs.length === 0) candidateActs = db.prepare("SELECT id FROM activities WHERE id != ? LIMIT 2").all(slotToChange.item_id);
+    
+    if (candidateActs.length > 0) {
+      slotToChange.item_id = shuffle(candidateActs)[0].id;
+    }
+  }
+
+  db.prepare("UPDATE daily_plans SET slots = ? WHERE id = ?").run(JSON.stringify(slots), plan.id);
+  
+  // Refetch hydrated slot to return
+  let itemDetails = null;
+  if (slotToChange.type === 'meal') {
+    itemDetails = db.prepare("SELECT id, title, prep_time as duration FROM recipes WHERE id = ?").get(slotToChange.item_id);
+  } else {
+    itemDetails = db.prepare("SELECT id, title, duration FROM activities WHERE id = ?").get(slotToChange.item_id);
+  }
+  
+  res.json({ ok: true, slot: { ...slotToChange, item: itemDetails || null } });
+});
 app.get("/api/recipes", (req, res) => {
   const recipes = db.prepare("SELECT * FROM recipes").all();
   res.json({ recipes });
+});
+
+app.get("/api/activities", (req, res) => {
+  const activities = db.prepare("SELECT * FROM activities").all();
+  res.json({ activities });
 });
 
 app.get("/api/favorites", (req, res) => {

@@ -59,13 +59,17 @@ export function Login() {
           <img src={logo} alt="Nakoo Logo" className="w-auto h-8" />
         </div>
 
-        <h1 className="text-3xl font-medium text-neutral-800 leading-tight mb-2 max-w-[239px]">
-          {activeTab === 'masuk' ? 'Selamat datang\nkembali!' : 'Selamat datang\nkembali!'}
+        <h1 className="text-3xl font-medium text-neutral-800 leading-tight mb-2 max-w-[260px]">
+          {activeTab === 'masuk' ? (
+            <>Selamat datang<br />kembali!</>
+          ) : (
+            <>Mulai rencanakan<br />hari si kecil!</>
+          )}
         </h1>
-        <p className="text-sm text-neutral-500 max-w-[239px]">
+        <p className="text-sm text-neutral-500 max-w-[260px]">
           {activeTab === 'masuk'
             ? 'Masuk untuk melanjutkan rencana harian si kecil'
-            : 'Mulai rencanakan hari terbaik untuk si kecil'}
+            : 'Daftar sekarang untuk susun menu & aktivitas harian'}
         </p>
       </header>
 
@@ -74,7 +78,7 @@ export function Login() {
         <button
           type="button"
           onClick={() => { setActiveTab('masuk'); setError(null); }}
-          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 ${activeTab === 'masuk'
+          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 cursor-pointer ${activeTab === 'masuk'
             ? 'bg-white border-2 border-primary-100 font-semibold text-primary-800'
             : 'bg-transparent border-none font-medium text-neutral-400'
             }`}
@@ -84,7 +88,7 @@ export function Login() {
         <button
           type="button"
           onClick={() => { setActiveTab('daftar'); setError(null); }}
-          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 ${activeTab === 'daftar'
+          className={`flex-1 py-2.5 text-base rounded-[12px] transition-all duration-200 cursor-pointer ${activeTab === 'daftar'
             ? 'bg-white border-2 border-primary-100 font-semibold text-primary-800'
             : 'bg-transparent border-none font-medium text-neutral-400'
             }`}
@@ -96,7 +100,7 @@ export function Login() {
       {/* Form Area */}
       <div className="flex-1 z-10 flex flex-col">
         {error && (
-          <div className="mb-4 p-3 bg-nakooRed-50 text-nakooRed-500 text-sm rounded-xl border border-nakooRed-200">
+          <div className="mb-4 p-3 bg-nakoo-red-50 text-nakoo-red-600 text-sm rounded-xl border border-nakoo-red-200">
             {error}
           </div>
         )}

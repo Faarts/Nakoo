@@ -42,9 +42,9 @@ export function ToastProvider({ children }) {
 
 function ToastItem({ toast, onDismiss }) {
   const styles = {
-    success: 'bg-nakooGreen-500',
-    error: 'bg-nakooRed-500',
-    info: 'bg-nakooBlue-500',
+    success: 'bg-nakoo-green-500',
+    error: 'bg-nakoo-red-500',
+    info: 'bg-nakoo-blue-500',
   };
 
   const Icons = {

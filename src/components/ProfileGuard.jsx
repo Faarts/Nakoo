@@ -20,10 +20,9 @@ export function ProfileGuard() {
     return <Navigate to="/setup-profile" replace />;
   }
   
-  // Jika profile sudah ada tapi mencoba akses /setup-profile, arahkan ke /home
-  // (Asumsi: edit profil dilakukan di dalam aplikasi, bukan di halaman setup awal)
+  // Jika profile sudah ada tapi mencoba akses /setup-profile, arahkan ke /
   if (profile && location.pathname === '/setup-profile') {
-     return <Navigate to="/home" replace />;
+     return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

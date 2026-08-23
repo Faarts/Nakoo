@@ -15,7 +15,7 @@ export function ProtectedRoute() {
 
   if (!user) {
     // Redirect ke login jika belum ada session
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

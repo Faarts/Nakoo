@@ -33,15 +33,15 @@ export function DesignPreview() {
             <span className="text-xs mt-1 text-neutral-600">Primary</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-nakooGreen-500 shadow-sm"></div>
+            <div className="w-12 h-12 rounded-full bg-nakoo-green-500 shadow-sm"></div>
             <span className="text-xs mt-1 text-neutral-600">Success</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-nakooRed-500 shadow-sm"></div>
+            <div className="w-12 h-12 rounded-full bg-nakoo-red-500 shadow-sm"></div>
             <span className="text-xs mt-1 text-neutral-600">Error</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-nakooBlue-500 shadow-sm"></div>
+            <div className="w-12 h-12 rounded-full bg-nakoo-blue-500 shadow-sm"></div>
             <span className="text-xs mt-1 text-neutral-600">Info</span>
           </div>
         </div>

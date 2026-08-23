@@ -79,7 +79,7 @@ export function SetupProfile() {
       });
       
       await refreshProfile();
-      navigate('/home', { replace: true });
+      navigate('/', { replace: true });
 
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat menyimpan profil');

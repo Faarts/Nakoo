@@ -24,7 +24,7 @@ export function TopBar({ className = '', isLoggedIn = true }) {
               setIsNotificationOpen(!isNotificationOpen);
               setIsMenuOpen(false);
             }}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakooGreen-600 hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white"
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakoo-green-600 hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white"
             aria-label="Notifikasi"
           >
             <Bell className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
@@ -37,7 +37,7 @@ export function TopBar({ className = '', isLoggedIn = true }) {
               setIsMenuOpen(!isMenuOpen);
               setIsNotificationOpen(false);
             }}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakooGreen-600 hover:bg-neutral-50 active:scale-95 transition-all"
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakoo-green-600 hover:bg-neutral-50 active:scale-95 transition-all"
             aria-label="Menu"
           >
             <Menu className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
@@ -80,13 +80,25 @@ export function TopBar({ className = '', isLoggedIn = true }) {
             <div className="p-2 flex flex-col">
               {isLoggedIn ? (
                 <>
-                  <button className="flex items-center gap-3 p-3 text-neutral-700 hover:bg-neutral-50 rounded-xl transition-all group w-full text-left">
+                  <button 
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/my-page');
+                    }}
+                    className="flex items-center gap-3 p-3 text-neutral-700 hover:bg-neutral-50 rounded-xl transition-all group w-full text-left cursor-pointer"
+                  >
                     <div className="p-2 bg-neutral-50 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all group-active:scale-95 duration-300">
                       <User className="w-5 h-5 text-nakoo-green-600" />
                     </div>
                     <span className="font-medium text-sm group-hover:translate-x-1 transition-transform duration-300">Profil Anak</span>
                   </button>
-                  <button className="flex items-center gap-3 p-3 text-neutral-700 hover:bg-neutral-50 rounded-xl transition-all group w-full text-left">
+                  <button 
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/my-page');
+                    }}
+                    className="flex items-center gap-3 p-3 text-neutral-700 hover:bg-neutral-50 rounded-xl transition-all group w-full text-left cursor-pointer"
+                  >
                     <div className="p-2 bg-neutral-50 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all group-active:scale-95 duration-300">
                       <Settings className="w-5 h-5 text-neutral-500" />
                     </div>

@@ -15,7 +15,7 @@ export function Button({
     primary: "bg-primary-500 text-white hover:bg-primary-600",
     auth: "bg-white text-neutral-800 border-[1.5px] border-[#F5F0EA] hover:bg-neutral-50",
     secondary: "bg-transparent text-primary-500 border border-primary-500 hover:bg-primary-50",
-    danger: "bg-nakooRed-500 text-white hover:bg-nakooRed-600",
+    danger: "bg-nakoo-red-500 text-white hover:bg-nakoo-red-600",
   };
 
   const sizes = {

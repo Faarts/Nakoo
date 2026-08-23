@@ -3,15 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 import { api } from '../lib/api';
 import { calculateAge } from '../lib/utils';
-import { TopBar } from '../components/TopBar';
 import { Button } from '../components/Button';
-import {
-  Salad, Puzzle, ChevronRight,
-  Calendar, ShieldCheck, LineChart,
-  Shield,
-  ChartBar,
-  ChartLine
-} from 'lucide-react';
+import { Salad, Puzzle, ChevronRight, Calendar } from 'lucide-react';
 import homeHeroImg from '../assets/home-hero.png';
 import ctaImg from '../assets/image-5.png';
 import tahukahIbuImg from '../assets/image-8.png';
@@ -20,6 +13,8 @@ import checkIcon from '../assets/icon/check-icon.svg';
 import saveIcon from '../assets/icon/save-icon.svg';
 import tumbuhIcon from '../assets/icon/tumbuh-icon.svg';
 import { Badge } from '../components/Badge';
+import { DUMMY_RECIPES } from '../../.mock/recipes';
+import { DUMMY_ACTIVITIES } from '../../.mock/activities';
 
 export function Home() {
   const navigate = useNavigate();
@@ -29,10 +24,14 @@ export function Home() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+  const [featuredRecipes, setFeaturedRecipes] = useState(DUMMY_RECIPES.slice(0, 5));
+  const [featuredActivities, setFeaturedActivities] = useState(DUMMY_ACTIVITIES.slice(0, 4));
+
   useEffect(() => {
     if (user) {
       fetchDailyPlan();
     }
+    fetchFeaturedContent();
   }, [user]);
 
   const fetchDailyPlan = async () => {
@@ -44,6 +43,23 @@ export function Home() {
       console.error(e);
     } finally {
       setLoadingPlan(false);
+    }
+  };
+
+  const fetchFeaturedContent = async () => {
+    try {
+      const [resRec, resAct] = await Promise.allSettled([
+        api.get('/api/recipes'),
+        api.get('/api/activities')
+      ]);
+      if (resRec.status === 'fulfilled' && resRec.value.recipes?.length > 0) {
+        setFeaturedRecipes(resRec.value.recipes.slice(0, 5));
+      }
+      if (resAct.status === 'fulfilled' && resAct.value.activities?.length > 0) {
+        setFeaturedActivities(resAct.value.activities.slice(0, 4));
+      }
+    } catch (e) {
+      // fallback to initial mock state
     }
   };
 
@@ -62,7 +78,7 @@ export function Home() {
   const childAgeStr = profile?.birth_date ? calculateAge(profile.birth_date) : '';
 
   return (
-    <div className="flex flex-col min-h-full bg-[#FFFBF8] pb-20">
+    <div className="flex flex-col min-h-full bg-[#FFFBF8]">
 
       {/* Hero Section - Public */}
       {!user && (
@@ -119,7 +135,7 @@ export function Home() {
                 ))}
               </div>
 
-              <Button onClick={() => navigate('/my-page')} variant="secondary" className="w-full">
+              <Button onClick={() => navigate('/my-page')} variant="secondary" className="w-full cursor-pointer">
                 Lihat rencana lengkap
               </Button>
             </div>
@@ -130,7 +146,7 @@ export function Home() {
               </div>
               <h3 className="text-lg font-semibold text-neutral-800 mb-2">Belum ada rencana hari ini</h3>
               <p className="text-sm text-neutral-500 mb-6">Mulai buat rencana menu dan aktivitas yang sesuai dengan perkembangan si kecil yuk!</p>
-              <Button onClick={handleGeneratePlan} disabled={generating} className="w-full">
+              <Button onClick={handleGeneratePlan} disabled={generating} className="w-full cursor-pointer">
                 {generating ? 'Membuat rencana...' : 'Buat rencana hari ini'}
               </Button>
             </div>
@@ -142,66 +158,32 @@ export function Home() {
       <section className="mb-8 mt-4">
         <div className="flex justify-between items-center px-6 mb-4">
           <h2 className="text-base font-semibold text-neutral-800">Menu makan pilihan</h2>
-          <Link to="/explore/menu" className="text-neutral-400 hover:text-neutral-600">
-            <ChevronRight className="w-5 h-5" />
+          <Link to="/explore/menu" className="text-neutral-400 hover:text-neutral-600 flex items-center gap-1 text-sm">
+            <span>Lihat semua</span>
+            <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
-          {/* Card 1 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/food-01.png" alt="Alpucok" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="red">🍎 Buah</Badge>
-              <Badge variant="yellow">🧀 Keju</Badge>
-            </div>
-          </Link>
-          {/* Card 2 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/food-02.png" alt="Pasta" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Pasta Daging Sapi Sayuran</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="red">🍎 Buah</Badge>
-              <Badge variant="yellow">🧀 Keju</Badge>
-            </div>
-          </Link>
-          {/* Card 3 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/food-03.png" alt="Alpucok" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="red">🍎 Buah</Badge>
-              <Badge variant="yellow">🧀 Keju</Badge>
-            </div>
-          </Link>
-          {/* Card 4 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/food-04.png" alt="Alpucok" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Pasta Daging Sapi Sayuran</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="red">🍎 Buah</Badge>
-              <Badge variant="yellow">🧀 Keju</Badge>
-            </div>
-          </Link>
-          {/* Card 5 */}
-          <Link to="/explore/menu" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/food-05.png" alt="Alpucok" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Alpucok Alpukat Kocok</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="red">🍎 Buah</Badge>
-              <Badge variant="yellow">🧀 Keju</Badge>
-            </div>
-          </Link>
+          {featuredRecipes.map((recipe, idx) => {
+            const num = ((idx % 8) + 1).toString().padStart(2, '0');
+            const imgSrc = `/img/food-${num}.png`;
+            return (
+              <Link 
+                key={recipe.id || idx} 
+                to={`/explore/menu/${recipe.id}`} 
+                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100 hover:shadow-md transition-all group"
+              >
+                <div className="w-full h-24 bg-neutral-100 rounded-xl mb-3 overflow-hidden">
+                  <img src={imgSrc} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                </div>
+                <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">{recipe.title}</h3>
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  <Badge variant="yellow">{recipe.age_range} bln</Badge>
+                  <Badge variant="primary">{recipe.prep_time || 20} mnt</Badge>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -209,79 +191,53 @@ export function Home() {
       <section className="mb-10">
         <div className="flex justify-between items-center px-6 mb-4">
           <h2 className="text-base font-semibold text-neutral-800">Aktivitas Pilihan</h2>
-          <Link to="/explore/activity" className="text-neutral-400 hover:text-neutral-600">
-            <ChevronRight className="w-5 h-5" />
+          <Link to="/explore/activity" className="text-neutral-400 hover:text-neutral-600 flex items-center gap-1 text-sm">
+            <span>Lihat semua</span>
+            <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 pb-4 snap-x hide-scrollbar flex-nowrap">
-          {/* Card 1 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/act-01.png" alt="Main Air" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="primary">Kertas</Badge>
-            </div>
-          </Link>
-          {/* Card 2 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/act-02.png" alt="Alpucok" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="primary">Kertas</Badge>
-            </div>
-          </Link>
-          {/* Card 3 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/act-03.png" alt="Main Air" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="primary">Kertas</Badge>
-            </div>
-          </Link>
-          {/* Card 4 */}
-          <Link to="/explore/activity" className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="/img/act-03.png" alt="Main Air" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Bermain Air</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="primary">Kertas</Badge>
-            </div>
-          </Link>
-          {/* Card 5 */}
-          <Link to="/explore/activity" className="min-w-[160px] max-w-[160px] snap-start bg-white rounded-2xl p-3 shadow-card-sm">
-            <div className="w-full h-24 bg-neutral-200 rounded-xl mb-3 overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=300&q=80" alt="Puzzle" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">Puzzle Bentuk</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="blue">Quiet Time</Badge>
-            </div>
-          </Link>
+          {featuredActivities.map((act, idx) => {
+            const num = ((idx % 3) + 1).toString().padStart(2, '0');
+            const localImg = `/img/act-${num}.png`;
+            const image = act.image || localImg;
+            const skill = Array.isArray(act.skills) ? act.skills[0] : (typeof act.skills === 'string' ? JSON.parse(act.skills || '[]')[0] : 'Motorik');
+
+            return (
+              <Link 
+                key={act.id || idx} 
+                to={`/explore/activity/${act.id}`} 
+                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100 hover:shadow-md transition-all group"
+              >
+                <div className="w-full h-24 bg-neutral-100 rounded-xl mb-3 overflow-hidden">
+                  <img src={image} alt={act.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                </div>
+                <h3 className="text-sm font-medium text-neutral-800 leading-tight mb-3 line-clamp-2">{act.title}</h3>
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  <Badge variant="green">{act.age_range} bln</Badge>
+                  {skill && <Badge variant="primary">{skill.replace('_', ' ')}</Badge>}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA Banner */}
       {!user && (
         <section className="px-6 mb-10">
-          <div className="bg-gradient-to-br from-primary-50 to-nakooBlue-100 rounded-[32px] p-5 flex flex-col items-center text-center relative overflow-hidden">
-            {/* Placeholder Bowl */}
+          <div className="bg-gradient-to-br from-primary-50 to-nakoo-blue-50 rounded-[32px] p-5 flex flex-col items-center text-center relative overflow-hidden border border-primary-100">
+            {/* CTA Illustration */}
             <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2" />
 
             <h2 className="text-xl font-semibold text-neutral-800 mb-3 leading-snug">
-              Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakooGreen-600">si kecil</span>
+              Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakoo-green-600">si kecil</span>
             </h2>
             <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
               Isi profil singkat si kecil, dan Nakoo bantu susun rencana harian yang pas setiap hari
             </p>
 
-            <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2">
+            <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2 cursor-pointer">
               Daftar Sekarang <span className="font-bold text-lg leading-none">→</span>
             </Button>
           </div>

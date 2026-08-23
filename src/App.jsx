@@ -9,21 +9,29 @@ import { ExploreActivity } from './pages/ExploreActivity'
 import { MyPage } from './pages/MyPage'
 import { DesignPreview } from './pages/DesignPreview'
 import { RecipeDetail } from './pages/RecipeDetail'
+import { ActivityDetail } from './pages/ActivityDetail'
+import { SetupProfile } from './pages/SetupProfile'
 
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { OfflineIndicator } from './components/OfflineIndicator'
 import { ToastProvider } from './components/Toast'
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <Router>
-          <div className="mx-auto max-w-md bg-white min-h-screen relative">
-            <Routes>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <Router>
+            <div className="mx-auto max-w-md bg-white min-h-screen relative">
+              <OfflineIndicator />
+              <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/setup-profile" element={<SetupProfile />} />
               <Route path="/design" element={<DesignPreview />} />
 
               {/* Rute Publik Tanpa Layout (Full Screen) */}
               <Route path="/explore/menu/:id" element={<RecipeDetail />} />
+              <Route path="/explore/activity/:id" element={<ActivityDetail />} />
 
               {/* Rute Publik dengan Layout */}
               <Route element={<Layout />}>
@@ -46,6 +54,7 @@ function App() {
         </Router>
       </AuthProvider>
     </ToastProvider>
+    </ErrorBoundary>
   )
 }
 
