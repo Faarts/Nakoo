@@ -328,7 +328,7 @@ export function Home() {
 
   const todayFormatted = formatIndonesianDate(new Date());
 
-  // Calculate streak days (defaults to 12 as shown in Figma if newly created)
+  // Calculate streak days
   const streakDay = profile?.created_at
     ? Math.max(1, Math.floor((new Date() - new Date(profile.created_at)) / (1000 * 60 * 60 * 24)) + 1)
     : 12;
@@ -438,24 +438,28 @@ export function Home() {
       const nextItem = scheduleList[idx + 1];
       const endMin = nextItem ? nextItem.startMin : item.startMin + 90;
       const isCurrent = currentMinutes >= item.startMin && currentMinutes < endMin;
+      // Otomatis tercentang jika jamnya sudah terlewati
+      const isTimePassed = currentMinutes >= endMin || (currentMinutes > item.startMin && !isCurrent);
+      const isDone = item.status === 'done' || isTimePassed;
+
       return {
         ...item,
         endMin,
-        isCurrent
+        isCurrent,
+        isTimePassed,
+        isDone
       };
     });
   };
 
   const hydratedSchedule = buildHydratedSchedule();
-  const completedCount = hydratedSchedule.filter(s => s.status === 'done').length;
+  const completedCount = hydratedSchedule.filter(s => s.isDone).length;
   const totalSlotsCount = hydratedSchedule.length || 6;
 
   return (
     <div className="flex flex-col min-h-full bg-[#FFFBF8] pb-10">
 
-      {/* ========================================================================= */}
-      {/* 1. REGISTERED USER VIEW (Matches .figma/my profile: Registered & Registered-1) */}
-      {/* ========================================================================= */}
+      {/* 1. REGISTERED USER VIEW */}
       {user ? (
         <div className="px-4 pt-3 pb-6">
 
@@ -520,7 +524,7 @@ export function Home() {
                 <p className="text-xs text-neutral-500 leading-snug mb-3">
                   Menu makan & aktivitas untuk buah hati
                 </p>
-                <div className="inline-flex items-center gap-1.5 bg-[#58774C] hover:bg-[#4a6440] text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm group-hover:shadow-md group-hover:translate-x-0.5 transition-all">
+                <div className="inline-flex items-center justify-between bg-[#58774C] hover:bg-[#4a6440] w-full text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm group-hover:shadow-md group-hover:translate-x-0.5 transition-all">
                   <span>Selengkapnya</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -605,7 +609,7 @@ export function Home() {
             </div>
           ) : !dailyPlan || !dailyPlan.slots || dailyPlan.slots.length === 0 ? (
 
-            /* State A: Belum ada rencana hari ini (Registered.png) */
+            /* Belum ada rencana hari ini */
             <div className="bg-white rounded-[28px] p-6 shadow-card border border-neutral-100/80 text-center flex flex-col items-center animate-scale-in">
               <div className="w-36 h-36 mb-2 flex items-center justify-center">
                 <img
@@ -644,7 +648,7 @@ export function Home() {
 
           ) : (
 
-            /* State B: Jadwal Hari Ini (Registered-1.png) */
+            /* Jadwal Hari Ini */
             <div className="bg-white rounded-[28px] p-5 shadow-card border border-neutral-100/80 animate-scale-in">
               {/* Header */}
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-100">
@@ -669,78 +673,96 @@ export function Home() {
                 </div>
               </div>
 
-              {/* Vertical timeline items */}
-              <div className="relative pl-5 space-y-3.5 before:absolute before:left-2 before:top-3 before:bottom-3 before:w-0.5 before:bg-orange-200/70">
+              {/* Vertical timeline items with continuous connecting line through avatar centers */}
+              <div className="relative space-y-3.5">
                 {hydratedSchedule.map((slot, idx) => {
-                  const isDone = slot.status === 'done';
+                  const isDone = slot.isDone;
                   const isCurrent = slot.isCurrent;
+                  const isLast = idx === hydratedSchedule.length - 1;
+                  const nextSlot = hydratedSchedule[idx + 1];
 
                   return (
-                    <div
-                      key={idx}
-                      className={`relative rounded-2xl transition-all duration-300 ${isCurrent
-                        ? 'bg-[#EAF5EC] border border-nakoo-green-300 p-3 -ml-2 -mr-2 shadow-xs animate-pulse-glow'
-                        : 'p-1 hover:bg-neutral-50'
-                        }`}
-                    >
-                      {/* Timeline dot / checkmark */}
-                      <div
-                        onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
-                        className={`absolute -left-[24px] top-3 w-5 h-5 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 active:scale-75 ${isDone
-                          ? 'bg-nakoo-green-500 text-white shadow-xs'
-                          : isCurrent
-                            ? 'bg-nakoo-green-500 text-white ring-4 ring-nakoo-green-200 ring-offset-1'
-                            : 'bg-white border-2 border-orange-300 text-transparent hover:border-orange-400'
+                    <div key={idx} className="relative">
+                      {/* Connecting line behind avatars */}
+                      {!isLast && (
+                        <div
+                          className={`absolute left-[23px] top-6 bottom-[-22px] z-0 pointer-events-none ${
+                            isDone && (nextSlot?.isDone || nextSlot?.isCurrent)
+                              ? 'w-0.5 bg-[#D4A882]'
+                              : isCurrent
+                              ? 'w-0 border-l-2 border-dashed border-[#D4A882]'
+                              : 'w-0 border-l-2 border-dashed border-[#E5C4A8]'
                           }`}
+                        />
+                      )}
+
+                      {/* Row Item Container */}
+                      <div
+                        className={`relative z-10 flex items-center justify-between rounded-[24px] transition-all duration-300 ${
+                          isCurrent
+                            ? 'bg-[#EAF5EC] border border-nakoo-green-200/80 p-3 -mx-2 shadow-xs animate-pulse-glow'
+                            : 'p-1.5 hover:bg-neutral-50/80'
+                        }`}
                       >
-                        {isDone ? (
-                          <Check className="w-3 h-3 stroke-[3] animate-check-pop" />
-                        ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {/* Emoji / Icon Box */}
-                        <div className="w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center shrink-0 border border-neutral-100 text-xl overflow-hidden hover:scale-110 transition-transform duration-200 select-none">
-                          <span>{slot.iconEmoji}</span>
-                        </div>
-
-                        {/* Title & Item Name */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className={`font-bold text-sm truncate transition-all duration-200 ${isDone ? 'text-neutral-400 line-through' : 'text-neutral-800'
-                              }`}>
-                              {slot.name}
-                            </h4>
-                            {isCurrent && (
-                              <span className="bg-nakoo-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 shadow-xs animate-bounce-once">
-                                SEKARANG
-                              </span>
-                            )}
+                        {/* Left: Avatar & Text */}
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          {/* Circular Avatar (on top of timeline line) */}
+                          <div
+                            className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center text-2xl select-none relative z-10 shadow-2xs transition-transform duration-200 hover:scale-105 ${
+                              isCurrent
+                                ? 'bg-[#5B8353] text-white shadow-md'
+                                : 'bg-[#FFF4EB] border border-[#F6DAC2]'
+                            }`}
+                          >
+                            <span>{slot.iconEmoji}</span>
                           </div>
-                          <p className={`text-xs truncate mt-0.5 transition-colors duration-200 ${isDone ? 'text-neutral-400' : 'text-neutral-500'
-                            }`}>
-                            {slot.desc}
-                          </p>
+
+                          {/* Title & Desc */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4
+                                className={`font-bold text-base leading-tight truncate transition-colors duration-200 ${
+                                  isCurrent ? 'text-[#3B6632]' : 'text-neutral-900'
+                                }`}
+                              >
+                                {slot.name}
+                              </h4>
+                              {isCurrent && (
+                                <span className="bg-[#FF3B30] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs animate-bounce-once">
+                                  SEKARANG
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-neutral-400 font-normal truncate mt-0.5">
+                              {slot.desc}
+                            </p>
+                          </div>
                         </div>
 
-                        {/* Time & Toggle Status */}
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-medium text-neutral-400 block mb-0.5">
+                        {/* Right: Time & Checkmark Status */}
+                        <div className="flex flex-col items-end shrink-0 pl-3">
+                          <span className="text-xs font-semibold text-neutral-600 mb-1">
                             {slot.time}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
-                            className={`w-6 h-6 rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-75 ${isDone
-                              ? 'bg-nakoo-green-500 text-white shadow-xs'
-                              : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-400 hover:text-neutral-600'
-                              }`}
-                            title={isDone ? 'Tandai belum' : 'Tandai selesai'}
-                          >
-                            <Check className={`w-3.5 h-3.5 stroke-[3] ${isDone ? 'animate-check-pop' : ''}`} />
-                          </button>
+                          <div className="h-5 flex items-center justify-center">
+                            {isDone ? (
+                              <button
+                                type="button"
+                                onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
+                                className="w-5 h-5 rounded-full bg-[#5B8353] text-white flex items-center justify-center shadow-xs cursor-pointer active:scale-75 transition-transform"
+                                title="Sudah selesai (klik untuk ubah)"
+                              >
+                                <Check className="w-3.5 h-3.5 stroke-[3] animate-check-pop" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
+                                className="w-5 h-5 rounded-full border border-neutral-200 hover:border-neutral-300 text-transparent flex items-center justify-center cursor-pointer active:scale-75 transition-all"
+                                title="Tandai selesai"
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Heart, Flame, Dna, Droplet, LayoutList, ListOrdered, MoreHorizontal } from 'lucide-react';
 import { DUMMY_RECIPES } from '../../.mock/recipes';
 import { useToast } from '../components/Toast';
+import { useAuth } from '../lib/AuthContext';
+import { AuthPromptModal } from '../components/AuthPromptModal';
 
 // Contextual recipe details map
 const RECIPE_DETAILS = {
@@ -72,6 +74,8 @@ export function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState('bahan');
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -86,11 +90,19 @@ export function RecipeDetail() {
   const recipe = { ...baseRecipe, ...detail };
 
   const handleToggleFavorite = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     setIsFavorite(!isFavorite);
     showToast(isFavorite ? 'Dihapus dari favorit' : 'Disimpan ke favorit ❤️', isFavorite ? 'info' : 'success');
   };
 
   const handleAddToPlan = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     showToast('Berhasil ditambahkan ke rencana hari ini 🌱', 'success');
   };
 
@@ -314,6 +326,15 @@ export function RecipeDetail() {
           <span className="text-xl leading-none">+</span> Tambahkan ke rencana hari ini
         </button>
       </div>
+
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Simpan Resep ke Rencana Harian"
+        message="Untuk menambahkan resep ini ke jadwal makan si kecil, Bunda perlu masuk atau membuat akun Nakoo terlebih dahulu."
+        itemType="resep"
+      />
     </div>
   );
 }

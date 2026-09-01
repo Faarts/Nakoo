@@ -5,6 +5,7 @@ import { DUMMY_ACTIVITIES } from '../../.mock/activities';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
+import { AuthPromptModal } from '../components/AuthPromptModal';
 
 // Safely parse skills — handles both JS array and JSON string
 function parseSkills(skills) {
@@ -35,6 +36,7 @@ export function ActivityDetail() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   const [activeTab, setActiveTab] = useState('bahan');
   const [isFavorite, setIsFavorite] = useState(false);
@@ -57,7 +59,7 @@ export function ActivityDetail() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      showToast('Silakan login terlebih dahulu', 'error');
+      setShowAuthModal(true);
       return;
     }
     try {
@@ -77,6 +79,10 @@ export function ActivityDetail() {
   };
 
   const handleAddToPlan = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     showToast('Berhasil ditambahkan ke rencana hari ini 🌱', 'success');
   };
 
@@ -272,6 +278,15 @@ export function ActivityDetail() {
           <span className="text-xl leading-none">+</span> Tambahkan ke rencana hari ini
         </button>
       </div>
+
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Simpan Aktivitas ke Rencana Harian"
+        message="Untuk menambahkan aktivitas ini ke jadwal stimulasi si kecil, Bunda perlu masuk atau membuat akun Nakoo terlebih dahulu."
+        itemType="aktivitas"
+      />
     </div>
   );
 }

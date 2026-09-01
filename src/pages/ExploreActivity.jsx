@@ -7,6 +7,7 @@ import { EmptyState } from '../components/EmptyState'
 import { useAuth } from '../lib/AuthContext'
 import { useToast } from '../components/Toast'
 import { api } from '../lib/api'
+import { AuthPromptModal } from '../components/AuthPromptModal'
 import { Heart, SlidersHorizontal, ArrowRight } from 'lucide-react'
 import { DUMMY_ACTIVITIES } from '../../.mock/activities'
 
@@ -58,6 +59,7 @@ export function ExploreActivity() {
   const [activities, setActivities] = useState([])
   const [favorites, setFavorites] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeQuickFilters, setActiveQuickFilters] = useState([])
@@ -96,7 +98,7 @@ export function ExploreActivity() {
     e.preventDefault()
     e.stopPropagation()
     if (!user) {
-      showToast('Silakan login untuk menyimpan favorit', 'error')
+      setShowAuthModal(true)
       return
     }
     const isFav = favorites.find(f => f.item_id === activity.id && f.item_type === 'activity')
@@ -378,6 +380,15 @@ export function ExploreActivity() {
           setAdvancedFilters(filters)
           setIsFilterOpen(false)
         }}
+      />
+
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Simpan Aktivitas ke Favorit"
+        message="Untuk menyimpan aktivitas ke favorit atau menyusunnya dalam rencana bermain si kecil, Bunda perlu masuk atau membuat akun Nakoo terlebih dahulu."
+        itemType="aktivitas"
       />
     </div>
   )

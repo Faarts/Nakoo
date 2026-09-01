@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 import { api } from '../lib/api';
 import { Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
@@ -12,7 +12,8 @@ import appleIcon from '../assets/icon/apple.svg';
 
 export function Login() {
   const { user, refreshAuth } = useAuth();
-  const [activeTab, setActiveTab] = useState('masuk'); // 'masuk' | 'daftar'
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.initialTab || 'masuk'); // 'masuk' | 'daftar'
   const [showPassword, setShowPassword] = useState(false);
 
   // Form state
@@ -22,9 +23,10 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Jika sudah login, redirect ke home (ProfileGuard akan handle jika belum setup profile)
+  // Jika sudah login, redirect ke halaman asal atau ke home (ProfileGuard akan handle jika belum setup profile)
   if (user) {
-    return <Navigate to="/" replace />;
+    const fromPath = location.state?.from || '/';
+    return <Navigate to={fromPath} replace />;
   }
 
   const handleSubmit = async (e) => {

@@ -10,6 +10,7 @@ import { Badge } from '../components/Badge';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
+import { AuthPromptModal } from '../components/AuthPromptModal';
 import { Heart, AlertTriangle, SlidersHorizontal, ArrowRight, Plus } from 'lucide-react';
 import { DUMMY_RECIPES } from '../../.mock/recipes';
 import category01 from '../assets/img/category 01.png';
@@ -47,6 +48,7 @@ export function ExploreMenu() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingId, setAddingId] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -94,7 +96,7 @@ export function ExploreMenu() {
 
   const toggleFavorite = async (recipe) => {
     if (!user) {
-      showToast("Silakan masuk (login) untuk menyimpan resep favorit", "error");
+      setShowAuthModal(true);
       return;
     }
 
@@ -120,7 +122,7 @@ export function ExploreMenu() {
 
   const addToPlan = async (recipe) => {
     if (!user) {
-      showToast("Silakan masuk (login) untuk menambahkan ke rencana", "error");
+      setShowAuthModal(true);
       return;
     }
     setAddingId(recipe.id);
@@ -355,6 +357,15 @@ export function ExploreMenu() {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={(filters) => setAdvancedFilters(filters)}
+      />
+
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Simpan Resep ke Rencana Harian"
+        message="Untuk menambahkan menu makanan ini ke rencana jadwal si kecil, Bunda perlu masuk atau membuat akun Nakoo terlebih dahulu."
+        itemType="resep"
       />
     </div>
   );

@@ -3,37 +3,71 @@ import { useAuth } from '../lib/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
-import { Calendar, Heart, User, CheckCircle2, Clock, ChevronRight, RefreshCw, Settings, Ban, Target, LogOut } from 'lucide-react';
-import { Card } from '../components/Card';
-import { EmptyState } from '../components/EmptyState';
+import {
+  Bell,
+  SlidersHorizontal,
+  Camera,
+  Calendar as CalendarIcon,
+  ArrowRight,
+  Edit2,
+  Ban,
+  Target,
+  LogOut,
+  Check
+} from 'lucide-react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { BottomSheet } from '../components/BottomSheet';
+import { DUMMY_ACTIVITIES } from '../../.mock/activities';
+
+// Helper to format date in Indonesian format e.g. "05 Januari 2024"
+function formatIndonesianDate(dateStr) {
+  if (!dateStr) return '05 Januari 2024';
+  const months = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  } catch (e) {
+    return dateStr;
+  }
+}
+
+// Helper to calculate age in months
+function calculateAgeInMonths(birthDateStr) {
+  if (!birthDateStr) return 14;
+  try {
+    const birth = new Date(birthDateStr);
+    const now = new Date();
+    const months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+    return months > 0 ? months : 14;
+  } catch (e) {
+    return 14;
+  }
+}
 
 export function MyPage() {
   const { user, profile, refreshProfile, logout } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState('jadwal');
-  
-  const [plan, setPlan] = useState(null);
-  const [loadingPlan, setLoadingPlan] = useState(true);
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [selectedDate, setSelectedDate] = useState(todayStr);
-  const isToday = selectedDate === todayStr;
-  
-  const [favorites, setFavorites] = useState([]);
-  const [recipes, setRecipes] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [loadingFavs, setLoadingFavs] = useState(true);
 
-  // Profile Form States
+  const [activities, setActivities] = useState(DUMMY_ACTIVITIES);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Form State for editing child & parent profile
   const [childName, setChildName] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState('Perempuan');
   const [alergies, setAlergies] = useState([]);
   const [skills, setSkills] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -42,111 +76,40 @@ export function MyPage() {
     }
 
     if (profile) {
-      setChildName(profile.child_name || '');
-      setBirthDate(profile.birth_date || '');
+      setChildName(profile.child_name || 'Aruna');
+      setBirthDate(profile.birth_date || '2024-01-05');
       try {
-        setAlergies(profile.alergies ? JSON.parse(profile.alergies) : []);
-        setSkills(profile.focus_skills ? JSON.parse(profile.focus_skills) : []);
+        setAlergies(profile.alergies ? (typeof profile.alergies === 'string' ? JSON.parse(profile.alergies) : profile.alergies) : ['Telur', 'Udang']);
+        setSkills(profile.focus_skills ? (typeof profile.focus_skills === 'string' ? JSON.parse(profile.focus_skills) : profile.focus_skills) : ['Motorik halus']);
       } catch (e) {
-        setAlergies([]);
-        setSkills([]);
+        setAlergies(['Telur', 'Udang']);
+        setSkills(['Motorik halus']);
       }
+    } else {
+      setChildName('Aruna');
+      setBirthDate('2024-01-05');
+      setAlergies(['Telur', 'Udang']);
+      setSkills(['Motorik halus']);
     }
-    
-    const fetchFavorites = async () => {
-      try {
-        const [resFav, resRec, resAct] = await Promise.all([
-          api.get('/api/favorites'),
-          api.get('/api/recipes'),
-          api.get('/api/activities')
-        ]);
-        setFavorites(resFav.favorites || []);
-        setRecipes(resRec.recipes || []);
-        setActivities(resAct.activities || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingFavs(false);
-      }
-    };
-    fetchFavorites();
+
+    // Fetch activities
+    api.get('/api/activities')
+      .then(res => {
+        if (res.activities && res.activities.length > 0) {
+          setActivities(res.activities);
+        }
+      })
+      .catch(() => {
+        setActivities(DUMMY_ACTIVITIES);
+      });
   }, [user, profile, navigate]);
 
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchPlan = async () => {
-      setLoadingPlan(true);
-      try {
-        const res = await api.get(`/api/daily-plans?date=${selectedDate}`);
-        setPlan(res.plan);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingPlan(false);
-      }
-    };
-    fetchPlan();
-  }, [user, selectedDate]);
-
-  const toggleSlotStatus = async (index, currentStatus) => {
-    if (!isToday) return; // Only allow edit for today
-    const newStatus = currentStatus === 'pending' ? 'done' : 'pending';
-    try {
-      const res = await api.put('/api/daily-plans/slot-status', {
-        date: selectedDate,
-        index,
-        status: newStatus
-      });
-      if (res.ok) {
-        setPlan(prev => {
-          const newSlots = [...prev.slots];
-          newSlots[index].status = newStatus;
-          return { ...prev, slots: newSlots };
-        });
-      }
-    } catch (e) {
-      showToast("Gagal mengupdate status", "error");
+  const toggleArrayItem = (item, array, setArray) => {
+    if (array.includes(item)) {
+      setArray(array.filter(i => i !== item));
+    } else {
+      setArray([...array, item]);
     }
-  };
-
-  const handleRegenerateSlot = async (index) => {
-    if (!isToday) return;
-    try {
-      const res = await api.post('/api/daily-plans/regenerate-slot', {
-        date: selectedDate,
-        index
-      });
-      if (res.ok) {
-        setPlan(prev => {
-          const newSlots = [...prev.slots];
-          newSlots[index] = res.slot;
-          return { ...prev, slots: newSlots };
-        });
-        showToast("Berhasil mengganti item");
-      }
-    } catch (e) {
-      showToast("Gagal mengganti item", "error");
-    }
-  };
-
-  const handleRegenerateAll = async () => {
-    if (!isToday) return;
-    try {
-      const res = await api.post('/api/daily-plans/generate');
-      if (res.ok) {
-        const planRes = await api.get(`/api/daily-plans?date=${selectedDate}`);
-        setPlan(planRes.plan);
-        showToast("Jadwal hari ini diacak ulang");
-      }
-    } catch (e) {
-      showToast("Gagal mengacak jadwal", "error");
-    }
-  };
-
-  const getFavoriteItemDetails = (fav) => {
-    if (fav.item_type === 'meal') return recipes.find(r => r.id === fav.item_id);
-    return activities.find(a => a.id === fav.item_id);
   };
 
   const handleSaveProfile = async (e) => {
@@ -162,6 +125,7 @@ export function MyPage() {
       });
       await refreshProfile();
       showToast("Profil berhasil diperbarui", "success");
+      setIsEditOpen(false);
     } catch (e) {
       showToast("Gagal menyimpan profil", "error");
     } finally {
@@ -169,324 +133,365 @@ export function MyPage() {
     }
   };
 
-  const toggleArrayItem = (item, array, setArray) => {
-    if (array.includes(item)) setArray(array.filter(i => i !== item));
-    else setArray([...array, item]);
-  };
+  const formattedBirthDate = formatIndonesianDate(birthDate || profile?.birth_date || '2024-01-05');
+  const ageInMonths = calculateAgeInMonths(birthDate || profile?.birth_date || '2024-01-05');
+  const displayChildName = childName || profile?.child_name || 'Aruna';
+  const allergiesString = (alergies && alergies.length > 0) ? alergies.join(', ') : 'Telur, Udang';
+  const skillsString = (skills && skills.length > 0) ? skills.join(', ') : 'Motorik halus';
+
+  // Activities mapping for Trending and Hari Ini
+  const trendingList = activities.slice(0, 4);
+  const dailyActivitiesList = activities.slice(0, 6);
 
   return (
-    <div className="pb-24 bg-neutral-50 min-h-screen">
-      {/* Header Profile */}
-      <div className="bg-white pt-6 pb-6 px-6 rounded-b-[32px] shadow-sm mb-6 border-b border-neutral-100/60">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="pb-28 bg-[#FBFBFB] min-h-screen">
+      <div className="px-5 pt-4">
+        {/* Title & Subtitle */}
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold text-neutral-900 leading-tight">Profil</h1>
+          <p className="text-sm text-neutral-400 font-normal mt-0.5">
+            Kelola informasi akun dan profil anak anda
+          </p>
+        </div>
+
+        {/* 1. Parent Account Card (Ayu Lestari) */}
+        <div
+          onClick={() => setIsEditOpen(true)}
+          className="bg-[#FFF9F3] border border-[#F6C6A0] rounded-[24px] p-3.5 sm:p-4 mb-4 flex items-center gap-3.5 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
+        >
+          {/* Parent Avatar with Camera Badge */}
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-sm overflow-hidden">
-              <img 
-                src="/img/mother-avatar.jpg" 
-                alt="Profil Bunda" 
-                className="w-full h-full object-cover rounded-full" 
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-xs">
+              <img
+                src="/img/mother-avatar.jpg"
+                alt="Profil Ibu"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-nakoo-green-500 border-2 border-white flex items-center justify-center text-white shadow-xs">
-              <Heart className="w-2.5 h-2.5 fill-white" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-[#5B8353] rounded-full border-2 border-white flex items-center justify-center text-white shadow-2xs">
+              <Camera className="w-2.5 h-2.5" />
             </div>
           </div>
+
+          {/* Parent Name & Email */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-neutral-900 truncate">
-              {user?.name || 'Bunda'}
-            </h1>
-            <p className="text-sm font-medium text-nakoo-green-700 truncate">
-              Anak: <span className="font-semibold">{profile?.child_name || 'Si Kecil'}</span>
-            </p>
-            <p className="text-xs text-neutral-400">
-              Lahir: {profile?.birth_date || '-'}
+            <h2 className="text-base font-bold text-neutral-900 leading-tight truncate group-hover:text-orange-900 transition-colors">
+              {user?.name || 'Ayu Lestari'}
+            </h2>
+            <p className="text-xs text-neutral-500 font-normal mt-0.5 truncate">
+              {user?.email || 'ayulestari@gmail.com'}
             </p>
           </div>
         </div>
-        
-        {/* Tab Navigation */}
-        <div className="flex bg-neutral-100 p-1.5 rounded-2xl relative shadow-inner-white">
-          <button 
-            className={`flex-1 py-2.5 text-sm font-bold rounded-xl z-10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 ${activeTab === 'jadwal' ? 'text-nakoo-green-900 font-extrabold' : 'text-neutral-500 hover:text-neutral-700'}`}
-            onClick={() => setActiveTab('jadwal')}
-          >
-            <Calendar className="w-4 h-4" /> Jadwal
-          </button>
-          <button 
-            className={`flex-1 py-2.5 text-sm font-bold rounded-xl z-10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 ${activeTab === 'favorit' ? 'text-nakoo-green-900 font-extrabold' : 'text-neutral-500 hover:text-neutral-700'}`}
-            onClick={() => setActiveTab('favorit')}
-          >
-            <Heart className="w-4 h-4" /> Favorit
-          </button>
-          <button 
-            className={`flex-1 py-2.5 text-sm font-bold rounded-xl z-10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 ${activeTab === 'profil' ? 'text-nakoo-green-900 font-extrabold' : 'text-neutral-500 hover:text-neutral-700'}`}
-            onClick={() => setActiveTab('profil')}
-          >
-            <Settings className="w-4 h-4" /> Profil
-          </button>
-          
-          <div 
-            className={`absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] bg-white rounded-xl transition-all duration-300 ease-out shadow-xs`}
-            style={{
-              left: activeTab === 'jadwal' ? '4px' : activeTab === 'favorit' ? 'calc(33.33% + 2px)' : 'calc(66.66% - 0px)'
-            }}
-          />
-        </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="px-4">
-        {activeTab === 'jadwal' && (
-          <div className="animate-slide-up-fade">
-            {/* Date Navigation */}
-            <div className="flex items-center justify-between mb-6 bg-white p-3 rounded-2xl shadow-card border border-neutral-100/80">
-              <input 
-                type="date" 
-                value={selectedDate}
-                max={todayStr}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-neutral-100 px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-800 border-none outline-none focus:ring-2 focus:ring-nakoo-green-500 transition-all cursor-pointer"
-              />
-              {!isToday && (
-                <button 
-                  onClick={() => setSelectedDate(todayStr)}
-                  className="text-xs font-bold text-nakoo-green-700 px-3.5 py-2 rounded-xl bg-nakoo-green-50 hover:bg-nakoo-green-100 active:scale-95 transition-all cursor-pointer shadow-2xs"
-                >
-                  Hari Ini
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-neutral-900">
-                {isToday ? "Jadwal Hari Ini" : "Riwayat Jadwal"}
-              </h2>
-              {isToday && plan && plan.slots && plan.slots.length > 0 && (
-                <button 
-                  onClick={handleRegenerateAll}
-                  className="text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 active:scale-90 hover:shadow-xs transition-all cursor-pointer group"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" /> Acak Ulang
-                </button>
-              )}
-            </div>
-            
-            {loadingPlan ? (
-              <p className="text-center text-neutral-500 py-10">Memuat jadwal...</p>
-            ) : !plan || !plan.slots || plan.slots.length === 0 ? (
-              <EmptyState 
-                title={isToday ? "Belum ada rencana" : "Tidak ada riwayat"}
-                description={isToday ? "Pergi ke Home untuk membuat rencana hari ini." : "Tidak ada rencana yang tercatat pada tanggal ini."}
-              />
-            ) : (
-              <div className="relative border-l-2 border-neutral-200 ml-4 pl-6 pb-4 space-y-6">
-                {plan.slots.map((slot, i) => {
-                  const isDone = slot.status === 'done';
-                  const isMeal = slot.type === 'meal';
-                  return (
-                    <div key={i} className="relative">
-                      {/* Timeline Dot */}
-                      <button 
-                        onClick={() => toggleSlotStatus(i, slot.status)}
-                        disabled={!isToday}
-                        className={`absolute -left-[35px] w-6 h-6 rounded-full flex items-center justify-center border-2 bg-white transition-all duration-200 ${isToday ? 'cursor-pointer active:scale-75 hover:scale-110' : 'cursor-default'} ${isDone ? 'border-nakoo-green-500 text-nakoo-green-500 shadow-xs' : 'border-neutral-300 text-transparent hover:border-nakoo-green-400'}`}
-                      >
-                        {isDone && <CheckCircle2 className="w-5 h-5 fill-nakoo-green-500 text-white animate-check-pop" />}
-                      </button>
-                      
-                      <Card className={`p-4 transition-all duration-300 ${isDone ? 'opacity-60 bg-neutral-50/70' : 'hover:shadow-md hover:-translate-y-0.5'}`}>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Clock className="w-3.5 h-3.5 text-orange-500" />
-                              <span className="text-xs font-bold text-orange-600">{slot.time}</span>
-                              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider bg-neutral-100 px-2 py-0.5 rounded-full">
-                                {isMeal ? 'Makan' : 'Main'}
-                              </span>
-                            </div>
-                            <h3 className={`font-bold text-base leading-tight mb-1 transition-colors ${isDone ? 'line-through text-neutral-400' : 'text-neutral-900'}`}>
-                              {slot.item?.title || 'Memuat...'}
-                            </h3>
-                            <p className="text-xs text-neutral-500">{slot.item?.duration} {isMeal ? 'menit masak' : 'menit'}</p>
-                          </div>
-                          
-                          <div className="flex flex-col gap-2">
-                            <Link 
-                              to={isMeal ? `/explore/menu/${slot.item_id}` : `/explore/activity/${slot.item_id}`}
-                              className="w-8 h-8 rounded-full bg-neutral-50 hover:bg-neutral-100 active:scale-90 flex items-center justify-center transition-all shadow-2xs"
-                            >
-                              <ChevronRight className="w-4 h-4 text-neutral-500" />
-                            </Link>
-                            
-                            {isToday && !isDone && (
-                              <button 
-                                onClick={() => handleRegenerateSlot(i)}
-                                className="w-8 h-8 rounded-full bg-orange-50 hover:bg-orange-100 active:scale-90 flex items-center justify-center text-orange-500 transition-all cursor-pointer shadow-2xs group"
-                                title="Acak item ini"
-                              >
-                                <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'favorit' && (
-          <div className="animate-slide-up-fade">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 px-2">Tersimpan</h2>
-            
-            {loadingFavs ? (
-              <p className="text-center text-neutral-500 py-10">Memuat favorit...</p>
-            ) : favorites.length === 0 ? (
-              <EmptyState 
-                title="Belum ada favorit"
-                description="Mulai simpan resep atau aktivitas yang Anda suka."
-              />
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {favorites.map(fav => {
-                  const item = getFavoriteItemDetails(fav);
-                  if (!item) return null;
-                  
-                  return (
-                    <Link 
-                      key={fav.id} 
-                      to={fav.item_type === 'meal' ? `/explore/menu/${fav.item_id}` : `/explore/activity/${fav.item_id}`}
-                      className="group"
-                    >
-                      <Card className="p-3.5 h-full flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-neutral-100/80 rounded-2xl">
-                        <div className="flex items-center gap-1 mb-2">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-white ${fav.item_type === 'meal' ? 'bg-orange-500' : 'bg-purple-500'}`}>
-                            {fav.item_type === 'meal' ? 'Resep' : 'Aktivitas'}
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-neutral-900 text-sm leading-tight line-clamp-2 group-hover:text-orange-600 transition-colors">
-                          {item.title}
-                        </h3>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'profil' && (
-          <div className="animate-slide-up-fade">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 px-2">Edit Profil Anak</h2>
-            
-            <form onSubmit={handleSaveProfile} className="space-y-6">
-              <Card className="p-5 space-y-4 rounded-2xl border border-neutral-100/80 shadow-card">
-                <Input 
-                  label="Nama Panggilan Anak" 
-                  value={childName}
-                  onChange={(e) => setChildName(e.target.value)}
-                  placeholder="Contoh: Raka"
-                  required
+        {/* 2. Child Profile Card (Aruna) */}
+        <div className="bg-white rounded-[24px] p-4.5 mb-6 border border-neutral-100/90 shadow-card hover:shadow-md transition-all duration-300">
+          {/* Top Row: Avatar, Name, Gender/Age, Date & Edit Icon */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-neutral-100 shadow-2xs bg-neutral-100">
+                <img
+                  src="/img/child-avatar.jpg"
+                  alt={displayChildName}
+                  className="w-full h-full object-cover"
                 />
-                
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-bold text-neutral-700">Tanggal Lahir</label>
-                  <input
-                    type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                    max={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-neutral-900 text-base focus:outline-none focus:ring-2 focus:ring-nakoo-green-500 focus:bg-white transition-all cursor-pointer"
-                    required
-                  />
-                </div>
-              </Card>
-
-              <Card className="p-5 rounded-2xl border border-neutral-100/80 shadow-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <Ban className="w-4 h-4 text-red-500" />
-                  </div>
-                  <h3 className="font-bold text-neutral-900">Alergi & Pantangan</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Telur', 'Susu', 'Kacang', 'Seafood', 'Gluten'].map(al => {
-                    const isSelected = alergies.includes(al);
-                    return (
-                      <button
-                        key={al}
-                        type="button"
-                        onClick={() => toggleArrayItem(al, alergies, setAlergies)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer border ${
-                          isSelected 
-                            ? 'border-red-500 bg-red-50 text-red-600 shadow-2xs scale-105' 
-                            : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
-                        }`}
-                      >
-                        {al}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Card>
-
-              <Card className="p-5 rounded-2xl border border-neutral-100/80 shadow-card">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <Target className="w-4 h-4 text-purple-500" />
-                  </div>
-                  <h3 className="font-bold text-neutral-900">Fokus Skill Utama</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Motorik Halus', 'Motorik Kasar', 'Kognitif', 'Bahasa', 'Sosial Emosional'].map(sk => {
-                    const isSelected = skills.includes(sk);
-                    return (
-                      <button
-                        key={sk}
-                        type="button"
-                        onClick={() => toggleArrayItem(sk, skills, setSkills)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer border ${
-                          isSelected 
-                            ? 'border-purple-500 bg-purple-50 text-purple-600 shadow-2xs scale-105' 
-                            : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
-                        }`}
-                      >
-                        {sk}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Card>
-
-              <div className="pb-4 flex flex-col gap-3">
-                <Button 
-                  type="submit" 
-                  fullWidth 
-                  loading={savingProfile}
-                >
-                  Simpan Perubahan
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logout();
-                    navigate('/login');
-                  }}
-                  className="w-full py-3 rounded-2xl border border-red-200 bg-red-50/50 hover:bg-red-50 text-red-600 font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Keluar dari Akun</span>
-                </button>
               </div>
-            </form>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-neutral-900 leading-tight truncate">
+                  {displayChildName}
+                </h3>
+                <p className="text-xs text-neutral-500 font-medium flex items-center gap-1 mt-0.5">
+                  <span className="text-pink-500 font-semibold">♀</span> {gender} • {ageInMonths} bulan
+                </p>
+                <p className="text-xs text-neutral-500 font-medium flex items-center gap-1.5 mt-0.5">
+                  <CalendarIcon className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>{formattedBirthDate}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Edit Icon */}
+            <button
+              type="button"
+              onClick={() => setIsEditOpen(true)}
+              className="w-8 h-8 rounded-full bg-neutral-50 hover:bg-orange-50 text-neutral-400 hover:text-orange-600 flex items-center justify-center transition-all active:scale-90 cursor-pointer shrink-0"
+              title="Edit Profil Anak"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
           </div>
-        )}
+
+          {/* Divider */}
+          <div className="h-px bg-neutral-100 my-3.5" />
+
+          {/* Bottom Row: 2 Columns (Alergi & Fokus Skill) */}
+          <div className="grid grid-cols-2 divide-x divide-neutral-100 items-center">
+            {/* Alergi Column */}
+            <div className="flex items-center gap-2.5 pr-2 min-w-0">
+              <img
+                src="/img/cereal-bowl.jpg"
+                alt="Alergi"
+                className="w-9 h-9 rounded-full object-cover shrink-0 border border-orange-100 shadow-2xs"
+              />
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-neutral-900 leading-tight">Alergi</h4>
+                <p className="text-xs text-neutral-500 truncate mt-0.5">
+                  {allergiesString}
+                </p>
+              </div>
+            </div>
+
+            {/* Fokus Skill Column */}
+            <div className="flex items-center gap-2.5 pl-3.5 min-w-0">
+              <img
+                src="/img/cereal-bowl.jpg"
+                alt="Fokus Skill"
+                className="w-9 h-9 rounded-full object-cover shrink-0 border border-orange-100 shadow-2xs"
+              />
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-neutral-900 leading-tight">Fokus Skill</h4>
+                <p className="text-xs text-neutral-500 truncate mt-0.5">
+                  {skillsString}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Trending Section */}
+        <section className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-base font-bold text-neutral-900">Trending</h3>
+            <Link
+              to="/explore/activity"
+              className="text-neutral-700 hover:text-orange-600 transition-colors p-1"
+              aria-label="Lihat semua aktivitas trending"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="flex overflow-x-auto gap-3.5 pb-2 -mx-5 px-5 scrollbar-hide">
+            {trendingList.map((act, idx) => {
+              const actImage = act.image || `/img/act-0${(idx % 3) + 1}.png`;
+              return (
+                <Link
+                  key={act.id || idx}
+                  to={`/explore/activity/${act.id}`}
+                  className="w-[185px] shrink-0 group"
+                >
+                  <div className="bg-white rounded-2xl p-2.5 border border-neutral-100/90 shadow-card-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                    <div className="aspect-[16/11] rounded-xl overflow-hidden mb-2.5 bg-neutral-100">
+                      <img
+                        src={actImage}
+                        alt={act.title}
+                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+                        loading="lazy"
+                      />
+                    </div>
+                    <h4 className="font-bold text-neutral-900 text-sm leading-tight mb-1.5 line-clamp-1 group-hover:text-orange-700 transition-colors">
+                      {act.title}
+                    </h4>
+                    <div className="mt-auto">
+                      <span className="text-[10px] font-semibold text-nakoo-green-700 bg-nakoo-green-50 px-2 py-0.5 rounded-full inline-block border border-nakoo-green-100/70">
+                        {act.age_range || '6+'} bulan
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 4. Aktivitas Hari Ini Section */}
+        <section className="mb-6">
+          <h3 className="text-base font-bold text-neutral-900 mb-3">Aktivitas Hari Ini</h3>
+
+          <div className="grid grid-cols-2 gap-3.5">
+            {dailyActivitiesList.map((act, idx) => {
+              const actImage = act.image || `/img/act-0${(idx % 3) + 1}.png`;
+              return (
+                <Link
+                  key={act.id || idx}
+                  to={`/explore/activity/${act.id}`}
+                  className="group block"
+                >
+                  <div className="bg-white rounded-2xl p-2.5 border border-neutral-100/90 shadow-card-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                    <div className="aspect-[4/3] rounded-xl overflow-hidden mb-2.5 bg-neutral-100">
+                      <img
+                        src={actImage}
+                        alt={act.title}
+                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+                        loading="lazy"
+                      />
+                    </div>
+                    <h4 className="font-bold text-neutral-900 text-sm leading-tight mb-1.5 line-clamp-1 group-hover:text-orange-700 transition-colors">
+                      {act.title}
+                    </h4>
+                    <div className="mt-auto">
+                      <span className="text-[10px] font-semibold text-nakoo-green-700 bg-nakoo-green-50 px-2 py-0.5 rounded-full inline-block border border-nakoo-green-100/70">
+                        {act.age_range || '6+'} bulan
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
       </div>
+
+      {/* Edit Profile BottomSheet Modal */}
+      <BottomSheet
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title="Edit Profil & Preferensi"
+      >
+        <form onSubmit={handleSaveProfile} className="space-y-5 pb-6">
+          <div className="space-y-4">
+            <Input
+              label="Nama Panggilan Anak"
+              value={childName}
+              onChange={(e) => setChildName(e.target.value)}
+              placeholder="Contoh: Aruna"
+              required
+            />
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-bold text-neutral-700">Tanggal Lahir</label>
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-neutral-900 text-base focus:outline-none focus:ring-2 focus:ring-nakoo-green-500 focus:bg-white transition-all cursor-pointer"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-bold text-neutral-700">Jenis Kelamin</label>
+              <div className="grid grid-cols-2 gap-2">
+                {['Perempuan', 'Laki-laki'].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${gender === g
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
+                      }`}
+                  >
+                    {g === 'Perempuan' ? '♀ Perempuan' : '♂ Laki-laki'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Alergi & Pantangan */}
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                <Ban className="w-3.5 h-3.5" />
+              </div>
+              <h4 className="text-xs font-bold text-neutral-900">Alergi & Pantangan Makanan</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['Telur', 'Susu Sapi', 'Kacang', 'Udang', 'Seafood', 'Gluten', 'Kedelai'].map(al => {
+                const isSelected = alergies.includes(al);
+                return (
+                  <button
+                    key={al}
+                    type="button"
+                    onClick={() => toggleArrayItem(al, alergies, setAlergies)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer border ${isSelected
+                        ? 'border-red-500 bg-red-50 text-red-600 shadow-2xs scale-105'
+                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100'
+                      }`}
+                  >
+                    {isSelected && <Check className="w-3 h-3 inline-block mr-1 -ml-0.5 stroke-[3] animate-check-pop" />}
+                    {al}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Fokus Skill Utama */}
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                <Target className="w-3.5 h-3.5" />
+              </div>
+              <h4 className="text-xs font-bold text-neutral-900">Fokus Skill Utama</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['Motorik halus', 'Motorik kasar', 'Kognitif', 'Bahasa', 'Sosial emosional', 'Kreativitas'].map(sk => {
+                const isSelected = skills.includes(sk);
+                return (
+                  <button
+                    key={sk}
+                    type="button"
+                    onClick={() => toggleArrayItem(sk, skills, setSkills)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer border ${isSelected
+                        ? 'border-purple-500 bg-purple-50 text-purple-600 shadow-2xs scale-105'
+                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100'
+                      }`}
+                  >
+                    {isSelected && <Check className="w-3 h-3 inline-block mr-1 -ml-0.5 stroke-[3] animate-check-pop" />}
+                    {sk}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-2 flex flex-col gap-3">
+            <Button
+              type="submit"
+              fullWidth
+              loading={savingProfile}
+              className="bg-[#FBB040] hover:bg-[#faa020] text-white shadow-md shadow-orange-400/30"
+            >
+              Simpan Perubahan
+            </Button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                navigate('/login');
+              }}
+              className="w-full py-3 rounded-2xl border border-red-200 bg-red-50/50 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Keluar dari Akun</span>
+            </button>
+          </div>
+        </form>
+      </BottomSheet>
+
+      {/* Notifications BottomSheet Modal */}
+      <BottomSheet
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        title="Notifikasi"
+      >
+        <div className="py-4 text-center">
+          <div className="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-3 text-orange-500">
+            <Bell className="w-8 h-8" />
+          </div>
+          <h4 className="text-base font-bold text-neutral-900 mb-1">Semua Notifikasi Terbaca</h4>
+          <p className="text-xs text-neutral-500 max-w-xs mx-auto mb-6">
+            Rencana harian dan rekomendasi gizi untuk {displayChildName} akan muncul di sini secara berkala.
+          </p>
+          <Button onClick={() => setIsNotificationOpen(false)} fullWidth>
+            Tutup
+          </Button>
+        </div>
+      </BottomSheet>
     </div>
   );
 }
