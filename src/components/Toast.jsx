@@ -42,9 +42,9 @@ export function ToastProvider({ children }) {
 
 function ToastItem({ toast, onDismiss }) {
   const styles = {
-    success: 'bg-nakoo-green-500',
-    error: 'bg-nakoo-red-500',
-    info: 'bg-nakoo-blue-500',
+    success: 'bg-emerald-600 border-emerald-500 shadow-emerald-500/20',
+    error: 'bg-nakoo-red-500 border-red-400 shadow-red-500/20',
+    info: 'bg-nakoo-blue-500 border-blue-400 shadow-blue-500/20',
   };
 
   const Icons = {
@@ -53,24 +53,43 @@ function ToastItem({ toast, onDismiss }) {
     info: Info,
   };
 
-  const bgColor = styles[toast.type] || styles.info;
+  const colorClass = styles[toast.type] || styles.info;
   const Icon = Icons[toast.type] || Icons.info;
 
   return (
     <div 
-      className={`fixed top-4 left-4 right-4 z-[60] flex items-center justify-between p-3 rounded-xl shadow-lg text-white ${bgColor} animate-in slide-in-from-top-4 fade-in duration-300`}
+      className={`fixed top-4 left-4 right-4 max-w-md mx-auto z-[60] flex flex-col rounded-2xl shadow-xl text-white ${colorClass} border overflow-hidden animate-slide-up-fade transition-all duration-300 backdrop-blur-md`}
       role="alert"
     >
-      <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5" strokeWidth={2.5} />
-        <span className="text-sm font-medium">{toast.message}</span>
+      <div className="flex items-center justify-between p-3.5 gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center shrink-0 animate-bounce-once">
+            <Icon className="w-4 h-4 stroke-[3]" />
+          </div>
+          <span className="text-sm font-semibold leading-tight">{toast.message}</span>
+        </div>
+        <button 
+          onClick={onDismiss}
+          className="p-1.5 rounded-full hover:bg-white/20 active:scale-90 transition-all text-white/80 hover:text-white cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
-      <button 
-        onClick={onDismiss}
-        className="p-1 rounded-full hover:bg-white/20 transition-colors"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      {/* Animated countdown timer line */}
+      <div className="w-full h-1 bg-black/15 overflow-hidden">
+        <div 
+          className="h-full bg-white/60 transition-all ease-linear"
+          style={{
+            animation: 'toastProgress 3000ms linear forwards'
+          }}
+        />
+      </div>
+      <style>{`
+        @keyframes toastProgress {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
     </div>
   );
 }

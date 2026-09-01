@@ -10,9 +10,9 @@ export function EmptyState({
   className = ''
 }) {
   return (
-    <div className={`flex flex-col items-center justify-center text-center py-12 px-6 ${className}`}>
+    <div className={`flex flex-col items-center justify-center text-center py-12 px-6 animate-slide-up-fade ${className}`}>
       {icon && (
-        <div className="text-[80px] leading-none mb-4" aria-hidden="true">
+        <div className="text-[80px] leading-none mb-4 animate-float-subtle select-none" aria-hidden="true">
           {icon}
         </div>
       )}

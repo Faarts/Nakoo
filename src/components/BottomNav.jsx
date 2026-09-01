@@ -25,14 +25,16 @@ export function BottomNav() {
               }
             >
               {({ isActive }) => (
-                <>
-                  <Icon className="w-[26px] h-[26px] mb-1.5" />
-                  <span className={`text-[11px] font-semibold leading-none`}>
+                <div className="flex flex-col items-center justify-center transition-transform duration-200 active:scale-90">
+                  <div className={`transition-transform duration-300 ease-out ${isActive ? 'scale-110 -translate-y-0.5' : 'scale-100'}`}>
+                    <Icon className="w-[26px] h-[26px] mb-1.5 transition-colors duration-200" />
+                  </div>
+                  <span className={`text-[11px] font-semibold leading-none transition-all duration-200 ${isActive ? 'font-bold' : 'font-medium'}`}>
                     {item.label}
                   </span>
                   {/* Active Indicator */}
-                  <div className={`mt-1.5 h-1 w-4 rounded-full transition-all duration-300 ${isActive ? 'bg-nakoo-red-500' : 'bg-transparent opacity-0'}`} />
-                </>
+                  <div className={`mt-1.5 h-1 rounded-full transition-all duration-300 ease-out ${isActive ? 'w-5 bg-nakoo-red-500 shadow-xs scale-100 opacity-100' : 'w-1 bg-transparent scale-50 opacity-0'}`} />
+                </div>
               )}
             </NavLink>
           );

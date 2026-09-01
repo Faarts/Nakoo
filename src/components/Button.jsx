@@ -9,12 +9,12 @@ export function Button({
   fullWidth = true,
   ...props 
 }) {
-  const baseStyles = "inline-flex items-center justify-center font-semibold transition-all duration-150 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseStyles = "inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out active:scale-[0.96] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100 cursor-pointer shadow-xs hover:shadow-md";
   
   const variants = {
-    primary: "bg-primary-500 text-white hover:bg-primary-600",
-    auth: "bg-white text-neutral-800 border-[1.5px] border-[#F5F0EA] hover:bg-neutral-50",
-    secondary: "bg-transparent text-primary-500 border border-primary-500 hover:bg-primary-50",
+    primary: "bg-primary-500 text-white hover:bg-primary-600 shadow-primary/40",
+    auth: "bg-white text-neutral-800 border-[1.5px] border-[#F5F0EA] hover:bg-neutral-50 hover:border-neutral-200",
+    secondary: "bg-transparent text-primary-600 border border-primary-400 hover:bg-primary-50",
     danger: "bg-nakoo-red-500 text-white hover:bg-nakoo-red-600",
   };
 

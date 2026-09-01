@@ -199,17 +199,17 @@ export function ExploreMenu() {
                   key={cat.value}
                   type="button"
                   onClick={() => setActiveCategory(cat.value)}
-                  className="flex flex-col items-center gap-2 min-w-fit cursor-pointer"
+                  className="flex flex-col items-center gap-2 min-w-fit cursor-pointer group"
                 >
                   <div
-                    className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl transition-all active:scale-95 ${isActive
-                      ? 'bg-orange-100 ring-2 ring-orange-400 ring-offset-1'
-                      : 'bg-primary-50 hover:bg-orange-100'
+                    className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl transition-all duration-300 ease-out active:scale-90 group-hover:scale-105 ${isActive
+                      ? 'bg-orange-100 ring-2 ring-orange-400 ring-offset-2 shadow-xs scale-105'
+                      : 'bg-primary-50 hover:bg-orange-100/70'
                       }`}
                   >
-                    {cat.icon && <img src={cat.icon} alt={cat.label} className="w-10 h-10 object-contain" />}
+                    {cat.icon && <img src={cat.icon} alt={cat.label} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300" />}
                   </div>
-                  <span className={`text-xs ${isActive ? 'text-neutral-900 font-semibold' : 'text-neutral-600 font-medium'}`}>
+                  <span className={`text-xs transition-colors duration-200 ${isActive ? 'text-orange-950 font-bold' : 'text-neutral-600 font-medium group-hover:text-neutral-900'}`}>
                     {cat.label}
                   </span>
                 </button>
@@ -247,7 +247,7 @@ export function ExploreMenu() {
           <div className="flex flex-col gap-6 -mx-4">
             {/* Rekomendasi Section */}
             {filteredRecipes.length > 0 && (
-              <div>
+              <div className="animate-slide-up-fade">
                 <div className="flex justify-between items-center px-4 mb-3">
                   <h2 className="text-base font-bold text-neutral-800">Rekomendasi untuk si kecil</h2>
                   <ArrowRight className="w-5 h-5 text-neutral-600" />
@@ -255,21 +255,21 @@ export function ExploreMenu() {
                 <div className="flex overflow-x-auto gap-4 px-4 pb-2 scrollbar-hide">
                   {filteredRecipes.slice(0, 2).map((recipe, idx) => (
                     <Link key={`rec-${recipe.id}`} to={`/explore/menu/${recipe.id}`} className="shrink-0 w-[280px]">
-                      <Card className="!p-0 overflow-hidden border border-neutral-100 shadow-card rounded-2xl h-full group hover:shadow-md transition-shadow">
+                      <Card className="!p-0 overflow-hidden border border-neutral-100/80 shadow-card rounded-2xl h-full group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                         <div className="aspect-[16/9] bg-neutral-100 relative overflow-hidden">
                           <img 
                             src={getRecipeImage(recipe, idx)} 
                             alt={recipe.title} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" 
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>
-                        <div className="p-3">
-                          <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-1">{recipe.title}</h3>
+                        <div className="p-3.5">
+                          <h3 className="font-bold text-neutral-900 text-sm mb-2 line-clamp-1 group-hover:text-orange-600 transition-colors">{recipe.title}</h3>
                           <div className="flex gap-2">
-                            <Badge variant="yellow" className="bg-[#FFF5EB] text-orange-700 !px-2 !py-0.5 font-medium">{recipe.age_range} bulan</Badge>
-                            <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-medium">{recipe.type || 'Menu'}</Badge>
+                            <Badge variant="yellow" className="bg-[#FFF5EB] text-orange-700 !px-2 !py-0.5 font-semibold">{recipe.age_range} bulan</Badge>
+                            <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-semibold">{recipe.type || 'Menu'}</Badge>
                           </div>
                         </div>
                       </Card>
@@ -290,13 +290,13 @@ export function ExploreMenu() {
                     const isFav = favorites.some(f => f.item_type === 'meal' && f.item_id === recipe.id);
 
                     return (
-                      <Link key={recipe.id} to={`/explore/menu/${recipe.id}`} className="block h-full">
-                        <Card className="!p-0 overflow-hidden group flex flex-col h-full border border-neutral-100 shadow-card hover:shadow-md rounded-2xl transition-all">
+                      <Link key={recipe.id} to={`/explore/menu/${recipe.id}`} className="block h-full group">
+                        <Card className="!p-0 overflow-hidden flex flex-col h-full border border-neutral-100/80 shadow-card hover:shadow-lg hover:-translate-y-1 rounded-2xl transition-all duration-300">
                           <div className="aspect-[4/3] bg-neutral-100 relative overflow-hidden">
                             <img 
                               src={getRecipeImage(recipe, idx)} 
                               alt={recipe.title} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                              className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" 
                               loading="lazy"
                             />
                             <button
@@ -306,25 +306,25 @@ export function ExploreMenu() {
                                 e.stopPropagation();
                                 toggleFavorite(recipe);
                               }}
-                              className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 active:scale-90 transition-all z-10 shadow-sm"
+                              className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 active:scale-75 hover:scale-110 transition-all duration-200 z-10 shadow-xs cursor-pointer"
                               aria-label={isFav ? 'Hapus dari favorit' : 'Simpan ke favorit'}
                             >
-                              <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />
+                              <Heart className={`w-4 h-4 transition-colors ${isFav ? 'fill-red-500 text-red-500 animate-heart-burst' : ''}`} />
                             </button>
                             {hasAllergenWarning && (
-                              <div className="absolute bottom-2 left-2 right-2 bg-red-100/90 backdrop-blur text-red-800 text-xs px-2 py-1 rounded-md flex items-center gap-1 font-medium shadow-sm">
+                              <div className="absolute bottom-2 left-2 right-2 bg-red-100/90 backdrop-blur text-red-800 text-xs px-2 py-1 rounded-md flex items-center gap-1 font-medium shadow-sm animate-pulse">
                                 <AlertTriangle className="w-3 h-3 shrink-0" />
                                 <span className="truncate">Alergen: {recipeAllergens.find(a => childAllergies.includes(a))}</span>
                               </div>
                             )}
                           </div>
                           <div className="p-3 flex flex-col grow">
-                            <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-2 leading-tight">
+                            <h3 className="font-bold text-neutral-900 text-sm mb-2 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">
                               {recipe.title}
                             </h3>
                             <div className="mt-auto flex items-center gap-2 flex-wrap">
-                              <Badge variant="yellow" className="!px-1.5 !py-0.5 !text-[10px] bg-primary-50 text-primary-700 font-medium">{recipe.age_range} bln</Badge>
-                              {recipe.prep_time && <Badge variant="default" className="!px-1.5 !py-0.5 !text-[10px] font-medium">{recipe.prep_time} mnt</Badge>}
+                              <Badge variant="yellow" className="!px-2 !py-0.5 !text-[10px] bg-primary-50 text-primary-700 font-semibold">{recipe.age_range} bln</Badge>
+                              {recipe.prep_time && <Badge variant="default" className="!px-2 !py-0.5 !text-[10px] font-semibold">{recipe.prep_time} mnt</Badge>}
                             </div>
                             <button
                               type="button"
@@ -334,7 +334,7 @@ export function ExploreMenu() {
                                 addToPlan(recipe);
                               }}
                               disabled={addingId === recipe.id}
-                              className="mt-2 w-full py-2 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-all disabled:opacity-60"
+                              className="mt-2.5 w-full py-2 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white text-xs font-bold flex items-center justify-center gap-1 active:scale-95 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 cursor-pointer shadow-xs"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               {addingId === recipe.id ? 'Menambahkan...' : 'Tambahkan rencana'}

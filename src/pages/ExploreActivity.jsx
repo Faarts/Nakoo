@@ -199,10 +199,10 @@ export function ExploreActivity() {
               key={qf.value}
               type="button"
               onClick={() => toggleQuickFilter(qf.value)}
-              className={`h-9 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-150 cursor-pointer border ${
+              className={`h-9 px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ease-out active:scale-95 cursor-pointer border ${
                 isActive
-                  ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
-                  : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-xs scale-105'
+                  : 'bg-white text-neutral-600 border-neutral-200/80 hover:bg-orange-50/50 hover:border-orange-200'
               }`}
             >
               {qf.label}
@@ -236,11 +236,11 @@ export function ExploreActivity() {
           <EmptyState
             title="Aktivitas tidak ditemukan"
             message="Coba ubah kata kunci atau kurangi filter untuk menemukan lebih banyak ide bermain."
-            icon={<SearchX className="w-12 h-12 text-neutral-300" />}
+            icon="🧩"
           />
         </div>
       ) : (
-        <>
+        <div className="animate-slide-up-fade">
           {/* Trending Section */}
           {trendingActivities.length > 0 && (
             <div className="mb-6">
@@ -261,27 +261,27 @@ export function ExploreActivity() {
                       key={`trending-${act.id}`}
                       className="shrink-0 w-[55%] group"
                     >
-                      <div className="relative">
+                      <div className="relative bg-white rounded-2xl p-3 border border-neutral-100/80 shadow-card hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                         {/* Favorite button */}
                         <button
                           onClick={(e) => toggleFavorite(e, act)}
-                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-xs hover:scale-110 active:scale-75 transition-all duration-200 cursor-pointer"
                         >
-                          <Heart className={`w-4 h-4 ${isFav ? 'fill-nakoo-red-500 text-nakoo-red-500' : 'text-neutral-400'}`} />
+                          <Heart className={`w-4 h-4 transition-colors ${isFav ? 'fill-nakoo-red-500 text-nakoo-red-500 animate-heart-burst' : 'text-neutral-400'}`} />
                         </button>
 
                         {/* Image */}
-                        <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 mb-2">
+                        <div className="aspect-[4/3] rounded-xl overflow-hidden bg-neutral-100 mb-2.5">
                           <img
                             src={image}
                             alt={act.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                             loading="lazy"
                           />
                         </div>
 
                         {/* Title */}
-                        <h3 className="font-semibold text-neutral-800 text-sm mb-1.5 line-clamp-1">
+                        <h3 className="font-bold text-neutral-800 text-sm mb-2 line-clamp-1 group-hover:text-nakoo-green-700 transition-colors">
                           {act.title}
                         </h3>
 
@@ -290,13 +290,13 @@ export function ExploreActivity() {
                           {tags.slice(0, 2).map(tag => (
                             <span
                               key={tag}
-                              className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-full"
+                              className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200/50"
                             >
                               {tag}
                             </span>
                           ))}
                           {tags.length > 2 && (
-                            <span className="text-xs font-medium text-neutral-400 bg-neutral-50 px-2 py-1 rounded-full">
+                            <span className="text-[10px] font-semibold text-neutral-400 bg-neutral-50 px-2 py-0.5 rounded-full border border-neutral-200/40">
                               +{tags.length - 2}
                             </span>
                           )}
@@ -325,36 +325,36 @@ export function ExploreActivity() {
                     key={act.id}
                     className="block group"
                   >
-                    <div className="relative">
+                    <div className="relative bg-white rounded-2xl p-3 border border-neutral-100/80 shadow-card hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                       {/* Favorite button */}
                       <button
                         onClick={(e) => toggleFavorite(e, act)}
-                        className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                        className="absolute top-4 right-4 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-xs hover:scale-110 active:scale-75 transition-all duration-200 cursor-pointer"
                       >
-                        <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-nakoo-red-500 text-nakoo-red-500' : 'text-neutral-400'}`} />
+                        <Heart className={`w-3.5 h-3.5 transition-colors ${isFav ? 'fill-nakoo-red-500 text-nakoo-red-500 animate-heart-burst' : 'text-neutral-400'}`} />
                       </button>
 
                       {/* Image */}
-                      <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 mb-2">
+                      <div className="aspect-[4/3] rounded-xl overflow-hidden bg-neutral-100 mb-2.5">
                         <img
                           src={image}
                           alt={act.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                           loading="lazy"
                         />
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-semibold text-neutral-800 text-sm mb-1.5 line-clamp-1">
+                      <h3 className="font-bold text-neutral-800 text-sm mb-2 line-clamp-1 group-hover:text-nakoo-green-700 transition-colors">
                         {act.title}
                       </h3>
 
-                      {/* Tag */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {tags.slice(0, 1).map(tag => (
+                      {/* Tags */}
+                      <div className="mt-auto flex flex-wrap gap-1.5">
+                        {tags.slice(0, 2).map(tag => (
                           <span
                             key={tag}
-                            className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-full"
+                            className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200/50"
                           >
                             {tag}
                           </span>
@@ -366,7 +366,7 @@ export function ExploreActivity() {
               })}
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Filter Bottom Sheet */}

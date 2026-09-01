@@ -1,16 +1,16 @@
 import React from 'react';
 
 export function Badge({ children, variant = 'default', icon, className = '' }) {
-  const baseStyles = "text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1 w-fit";
+  const baseStyles = "text-[10px] font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1 w-fit transition-all duration-200";
   
   const variants = {
-    red: "bg-red-50 text-red-600",
-    yellow: "bg-yellow-50 text-yellow-600",
-    blue: "bg-nakoo-blue-50 text-nakoo-blue-600",
-    green: "bg-nakoo-green-50 text-nakoo-green-700",
-    primary: "bg-primary-50 text-primary-600",
-    glass: "bg-white/80 backdrop-blur-md text-neutral-800 shadow-sm",
-    default: "bg-neutral-100 text-neutral-600",
+    red: "bg-red-50 text-red-600 border border-red-100",
+    yellow: "bg-orange-50 text-orange-700 border border-orange-100",
+    blue: "bg-nakoo-blue-50 text-nakoo-blue-600 border border-nakoo-blue-100",
+    green: "bg-nakoo-green-50 text-nakoo-green-700 border border-nakoo-green-100",
+    primary: "bg-primary-50 text-primary-700 border border-primary-100",
+    glass: "bg-white/85 backdrop-blur-md text-neutral-800 shadow-xs border border-white/40",
+    default: "bg-neutral-100 text-neutral-600 border border-neutral-200/60",
   };
 
   return (

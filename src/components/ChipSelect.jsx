@@ -19,13 +19,13 @@ export function ChipSelect({ options = [], selectedValues = [], onChange }) {
             key={option.value}
             type="button"
             onClick={() => toggleSelection(option.value)}
-            className={`flex items-center h-9 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 border ${
+            className={`flex items-center h-9 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ease-out active:scale-95 cursor-pointer ${
               isSelected
-                ? 'bg-primary-100 text-primary-700 border-primary-300'
-                : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
+                ? 'bg-orange-500 text-white border-orange-500 shadow-xs scale-[1.02]'
+                : 'bg-white text-neutral-600 border border-neutral-200 hover:border-orange-200 hover:bg-orange-50/50'
             }`}
           >
-            {isSelected && <Check className="w-4 h-4 mr-1.5" strokeWidth={3} />}
+            {isSelected && <Check className="w-4 h-4 mr-1.5 stroke-[3] animate-check-pop" />}
             {option.label}
           </button>
         );

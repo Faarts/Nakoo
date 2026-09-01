@@ -6,12 +6,12 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { BottomSheet } from '../components/BottomSheet';
 import { useToast } from '../components/Toast';
-import { 
-  Calendar, 
-  Heart, 
-  ArrowRight, 
-  Check, 
-  RefreshCw, 
+import {
+  Calendar,
+  Heart,
+  ArrowRight,
+  Check,
+  RefreshCw,
   ChevronRight,
   Sparkles,
   Clock,
@@ -467,33 +467,33 @@ export function Home() {
               </p>
               <h1 className="text-2xl font-bold text-neutral-900 leading-tight">
                 Rencana hari ini<br />
-                untuk si <span className="text-nakoo-green-600">{profile?.child_name || 'Buah Hati'}</span> 🌱
+                untuk si <span className="text-nakoo-green-600 font-extrabold">{profile?.child_name || 'Buah Hati'}</span> 🌱
               </h1>
             </div>
 
             {/* Mother Profile Avatar Link */}
             <Link to="/my-page" className="relative group shrink-0 ml-3 mt-1" title="Lihat Profil & Akun Saya">
-              <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-md group-hover:scale-105 transition-transform overflow-hidden">
-                <img 
-                  src="/img/mother-avatar.jpg" 
-                  alt="Profil Bunda" 
-                  className="w-full h-full object-cover rounded-full" 
+              <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-md group-hover:scale-108 group-active:scale-95 transition-all duration-300 overflow-hidden">
+                <img
+                  src="/img/mother-avatar.jpg"
+                  alt="Profil Bunda"
+                  className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-nakoo-green-500 border-2 border-white flex items-center justify-center text-white shadow-xs">
-                <Heart className="w-2.5 h-2.5 fill-white" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-nakoo-green-500 border-2 border-white flex items-center justify-center text-white shadow-xs group-hover:scale-110 transition-transform">
+                <Heart className="w-2.5 h-2.5 fill-white animate-pulse" />
               </div>
             </Link>
           </div>
 
           {/* Date Chip & Completion Status */}
           <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-1.5 bg-[#FFF2E5] border border-orange-200/60 text-orange-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs">
+            <div className="flex items-center gap-1.5 bg-[#FFF2E5] border border-orange-200/60 text-orange-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs hover:bg-[#ffe8d6] transition-colors">
               <Calendar className="w-3.5 h-3.5 text-orange-600" />
               <span>{todayFormatted}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 bg-white px-3 py-1.5 rounded-full border border-neutral-100 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-nakoo-green-500 inline-block animate-pulse" />
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 bg-white px-3 py-1.5 rounded-full border border-neutral-100 shadow-xs hover:shadow-sm transition-all">
+              <span className={`w-2 h-2 rounded-full inline-block ${completedCount === totalSlotsCount ? 'bg-nakoo-green-500 animate-bounce' : 'bg-nakoo-green-500 animate-pulse'}`} />
               <span>{completedCount}/{totalSlotsCount} selesai</span>
             </div>
           </div>
@@ -502,27 +502,27 @@ export function Home() {
           <div className="grid grid-cols-2 gap-3 mb-6">
 
             {/* Left Card: Rencana Hari Ini */}
-            <Link 
-              to="/my-page" 
-              className="bg-[#FFF5EB] rounded-[28px] p-4 flex flex-col justify-between hover:shadow-md transition-all group active:scale-[0.98] border border-orange-100/60"
+            <Link
+              to="/my-page"
+              className="bg-[#FFF5EB] rounded-[28px] p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98] border border-orange-100/60"
             >
               <div className="relative w-full aspect-square mb-2 rounded-2xl overflow-hidden flex items-center justify-center bg-orange-50/50">
-                <img 
-                  src="/img/dash-child-blocks.jpg" 
-                  alt="Rencana Hari Ini" 
-                  className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500" 
+                <img
+                  src="/img/dash-child-blocks.jpg"
+                  alt="Rencana Hari Ini"
+                  className="w-full h-full object-cover rounded-2xl group-hover:scale-108 transition-transform duration-500 ease-out"
                 />
               </div>
               <div>
-                <h3 className="font-bold text-neutral-800 text-base leading-tight mb-1">
+                <h3 className="font-bold text-neutral-800 text-base leading-tight mb-1 group-hover:text-orange-900 transition-colors">
                   Rencana hari ini
                 </h3>
                 <p className="text-xs text-neutral-500 leading-snug mb-3">
                   Menu makan & aktivitas untuk buah hati
                 </p>
-                <div className="inline-flex items-center gap-1.5 bg-[#58774C] hover:bg-[#4a6440] text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm">
+                <div className="inline-flex items-center gap-1.5 bg-[#58774C] hover:bg-[#4a6440] text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm group-hover:shadow-md group-hover:translate-x-0.5 transition-all">
                   <span>Selengkapnya</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -530,45 +530,45 @@ export function Home() {
             {/* Right Column: 2 Cards */}
             <div className="flex flex-col gap-3">
               {/* Right Top: Eksplor Menu Makan */}
-              <Link 
-                to="/explore/menu" 
-                className="bg-[#EAF5EC] rounded-[24px] p-3.5 flex flex-col justify-between hover:shadow-md transition-all group active:scale-[0.98] relative overflow-hidden flex-1 border border-nakoo-green-100/60"
+              <Link
+                to="/explore/menu"
+                className="bg-[#EAF5EC] rounded-[24px] p-3.5 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98] relative overflow-hidden flex-1 border border-nakoo-green-100/60"
               >
                 <div className="flex justify-end mb-1">
-                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs text-nakoo-green-700 group-hover:translate-x-0.5 transition-transform">
+                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs text-nakoo-green-700 group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300">
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="w-20 h-20 mx-auto my-1 flex items-center justify-center">
-                  <img 
-                    src="/img/dash-bowl-veggie.jpg" 
-                    alt="Eksplor Menu Makan" 
-                    className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300" 
+                  <img
+                    src="/img/dash-bowl-veggie.jpg"
+                    alt="Eksplor Menu Makan"
+                    className="w-full h-full object-contain rounded-xl group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
                 </div>
-                <h3 className="font-bold text-nakoo-green-900 text-sm leading-tight mt-1">
+                <h3 className="font-bold text-nakoo-green-900 text-sm leading-tight mt-1 group-hover:text-nakoo-green-800 transition-colors">
                   Eksplor<br />menu makan
                 </h3>
               </Link>
 
               {/* Right Bottom: Eksplor Aktivitas */}
-              <Link 
-                to="/explore/activity" 
-                className="bg-[#FDF0EB] rounded-[24px] p-3.5 flex flex-col justify-between hover:shadow-md transition-all group active:scale-[0.98] relative overflow-hidden flex-1 border border-orange-100/60"
+              <Link
+                to="/explore/activity"
+                className="bg-[#FDF0EB] rounded-[24px] p-3.5 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98] relative overflow-hidden flex-1 border border-orange-100/60"
               >
                 <div className="flex justify-end mb-1">
-                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs text-orange-600 group-hover:translate-x-0.5 transition-transform">
+                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs text-orange-600 group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300">
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="w-20 h-20 mx-auto my-1 flex items-center justify-center">
-                  <img 
-                    src="/img/dash-stack-blocks.jpg" 
-                    alt="Eksplor Aktivitas" 
-                    className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300" 
+                  <img
+                    src="/img/dash-stack-blocks.jpg"
+                    alt="Eksplor Aktivitas"
+                    className="w-full h-full object-contain rounded-xl group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
                 </div>
-                <h3 className="font-bold text-orange-950 text-sm leading-tight mt-1">
+                <h3 className="font-bold text-orange-950 text-sm leading-tight mt-1 group-hover:text-orange-800 transition-colors">
                   Eksplor<br />Aktivitas
                 </h3>
               </Link>
@@ -576,17 +576,22 @@ export function Home() {
           </div>
 
           {/* Time Progress Indicator Bar */}
-          <div className="mb-6 bg-white rounded-2xl p-3.5 border border-neutral-100 shadow-xs">
+          <div className="mb-6 bg-white rounded-2xl p-3.5 border border-neutral-100 shadow-xs hover:shadow-sm transition-all">
             <div className="flex items-center justify-between text-xs text-neutral-500 mb-1.5 px-1 font-medium">
               <span className="flex items-center gap-1 text-neutral-600">☀️ Pagi</span>
-              <span className="font-bold text-nakoo-red-500">Sekarang: {currentTimeStr}</span>
+              <span className="font-bold text-nakoo-red-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-nakoo-red-500 animate-ping" />
+                Sekarang: {currentTimeStr}
+              </span>
               <span className="flex items-center gap-1 text-neutral-600">🌙 Malam</span>
             </div>
-            <div className="w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-nakoo-green-600 rounded-full transition-all duration-500 shadow-xs" 
+            <div className="w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden relative">
+              <div
+                className="h-full bg-gradient-to-r from-nakoo-green-500 to-nakoo-green-600 rounded-full transition-all duration-700 shadow-xs relative"
                 style={{ width: `${dayProgress}%` }}
-              />
+              >
+                <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 rounded-full animate-pulse" />
+              </div>
             </div>
           </div>
 
@@ -594,19 +599,19 @@ export function Home() {
           {/* BOTTOM SCHEDULE CARD: Registered (Empty) vs Registered-1 (Has Schedule)   */}
           {/* ========================================================================= */}
           {loadingPlan ? (
-            <div className="bg-white rounded-[28px] p-8 shadow-card border border-neutral-100 text-center flex flex-col items-center">
+            <div className="bg-white rounded-[28px] p-8 shadow-card border border-neutral-100 text-center flex flex-col items-center animate-pulse">
               <RefreshCw className="w-8 h-8 text-neutral-300 animate-spin mb-2" />
               <p className="text-sm text-neutral-400">Memuat rencana hari ini...</p>
             </div>
           ) : !dailyPlan || !dailyPlan.slots || dailyPlan.slots.length === 0 ? (
 
             /* State A: Belum ada rencana hari ini (Registered.png) */
-            <div className="bg-white rounded-[28px] p-6 shadow-card border border-neutral-100/80 text-center flex flex-col items-center">
+            <div className="bg-white rounded-[28px] p-6 shadow-card border border-neutral-100/80 text-center flex flex-col items-center animate-scale-in">
               <div className="w-36 h-36 mb-2 flex items-center justify-center">
-                <img 
-                  src="/img/dash-plant-pot.jpg" 
-                  alt="Tanaman Tumbuh" 
-                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" 
+                <img
+                  src="/img/dash-plant-pot.jpg"
+                  alt="Tanaman Tumbuh"
+                  className="w-full h-full object-contain hover:scale-108 transition-transform duration-500 animate-float-subtle"
                 />
               </div>
               <h3 className="text-lg font-bold text-neutral-800 mb-1">
@@ -616,19 +621,19 @@ export function Home() {
                 Tanaman tumbuh ketika dirawat dengan rutin 🌱
               </p>
 
-              <button 
+              <button
                 type="button"
-                onClick={handleOpenScheduleModal} 
-                disabled={generating} 
-                className="w-full py-4 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white font-bold text-base shadow-lg shadow-orange-400/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
+                onClick={handleOpenScheduleModal}
+                disabled={generating}
+                className="w-full py-4 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white font-bold text-base shadow-lg shadow-orange-400/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 hover:-translate-y-0.5 transition-all duration-200"
               >
                 <Calendar className="w-5 h-5" />
                 <span>{generating ? 'Menyusun rencana...' : 'Atur & buat rencana hari ini →'}</span>
               </button>
 
-              <button 
+              <button
                 type="button"
-                onClick={() => setShowCopyModal(true)} 
+                onClick={() => setShowCopyModal(true)}
                 disabled={generating}
                 className="mt-4 text-xs font-semibold text-neutral-500 hover:text-neutral-700 flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
               >
@@ -640,7 +645,7 @@ export function Home() {
           ) : (
 
             /* State B: Jadwal Hari Ini (Registered-1.png) */
-            <div className="bg-white rounded-[28px] p-5 shadow-card border border-neutral-100/80">
+            <div className="bg-white rounded-[28px] p-5 shadow-card border border-neutral-100/80 animate-scale-in">
               {/* Header */}
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-100">
                 <div className="flex items-center gap-2">
@@ -650,22 +655,15 @@ export function Home() {
                   <button
                     type="button"
                     onClick={handleOpenScheduleModal}
-                    className="p-1 rounded-lg text-neutral-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                    className="p-1 rounded-lg text-neutral-400 hover:text-orange-600 hover:bg-orange-50 active:scale-90 transition-all cursor-pointer"
                     title="Ubah & Sesuaikan Jadwal"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleOpenScheduleModal}
-                    className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-full border border-orange-200/70 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                  >
-                    <Clock className="w-3 h-3" />
-                    <span>Ubah Jadwal</span>
-                  </button>
-                  <span className="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+
+                  <span className="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100 hover:animate-wiggle cursor-default select-none shadow-2xs">
                     Hari ke-{streakDay} 🎉
                   </span>
                 </div>
@@ -678,27 +676,25 @@ export function Home() {
                   const isCurrent = slot.isCurrent;
 
                   return (
-                    <div 
-                      key={idx} 
-                      className={`relative rounded-2xl transition-all ${
-                        isCurrent 
-                          ? 'bg-[#EAF5EC] border border-nakoo-green-200/90 p-3 -ml-2 -mr-2 shadow-xs' 
-                          : 'p-1 hover:bg-neutral-50'
-                      }`}
+                    <div
+                      key={idx}
+                      className={`relative rounded-2xl transition-all duration-300 ${isCurrent
+                        ? 'bg-[#EAF5EC] border border-nakoo-green-300 p-3 -ml-2 -mr-2 shadow-xs animate-pulse-glow'
+                        : 'p-1 hover:bg-neutral-50'
+                        }`}
                     >
                       {/* Timeline dot / checkmark */}
-                      <div 
-                        onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)} 
-                        className={`absolute -left-[24px] top-3 w-5 h-5 rounded-full flex items-center justify-center cursor-pointer transition-all ${
-                          isDone 
-                            ? 'bg-nakoo-green-500 text-white shadow-xs' 
-                            : isCurrent 
-                            ? 'bg-nakoo-green-500 text-white ring-4 ring-nakoo-green-100' 
-                            : 'bg-white border-2 border-orange-300 text-transparent'
-                        }`}
+                      <div
+                        onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
+                        className={`absolute -left-[24px] top-3 w-5 h-5 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 active:scale-75 ${isDone
+                          ? 'bg-nakoo-green-500 text-white shadow-xs'
+                          : isCurrent
+                            ? 'bg-nakoo-green-500 text-white ring-4 ring-nakoo-green-200 ring-offset-1'
+                            : 'bg-white border-2 border-orange-300 text-transparent hover:border-orange-400'
+                          }`}
                       >
                         {isDone ? (
-                          <Check className="w-3 h-3 stroke-[3]" />
+                          <Check className="w-3 h-3 stroke-[3] animate-check-pop" />
                         ) : (
                           <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
                         )}
@@ -706,23 +702,25 @@ export function Home() {
 
                       <div className="flex items-center gap-3">
                         {/* Emoji / Icon Box */}
-                        <div className="w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center shrink-0 border border-neutral-100 text-xl overflow-hidden">
+                        <div className="w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center shrink-0 border border-neutral-100 text-xl overflow-hidden hover:scale-110 transition-transform duration-200 select-none">
                           <span>{slot.iconEmoji}</span>
                         </div>
 
                         {/* Title & Item Name */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-neutral-800 text-sm truncate">
+                            <h4 className={`font-bold text-sm truncate transition-all duration-200 ${isDone ? 'text-neutral-400 line-through' : 'text-neutral-800'
+                              }`}>
                               {slot.name}
                             </h4>
                             {isCurrent && (
-                              <span className="bg-nakoo-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                              <span className="bg-nakoo-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 shadow-xs animate-bounce-once">
                                 SEKARANG
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-neutral-500 truncate mt-0.5">
+                          <p className={`text-xs truncate mt-0.5 transition-colors duration-200 ${isDone ? 'text-neutral-400' : 'text-neutral-500'
+                            }`}>
                             {slot.desc}
                           </p>
                         </div>
@@ -732,17 +730,16 @@ export function Home() {
                           <span className="text-xs font-medium text-neutral-400 block mb-0.5">
                             {slot.time}
                           </span>
-                          <button 
-                            type="button" 
-                            onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)} 
-                            className={`w-6 h-6 rounded-full inline-flex items-center justify-center transition-all cursor-pointer ${
-                              isDone 
-                                ? 'bg-nakoo-green-500 text-white shadow-xs' 
-                                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-400'
-                            }`}
+                          <button
+                            type="button"
+                            onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
+                            className={`w-6 h-6 rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-75 ${isDone
+                              ? 'bg-nakoo-green-500 text-white shadow-xs'
+                              : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-400 hover:text-neutral-600'
+                              }`}
                             title={isDone ? 'Tandai belum' : 'Tandai selesai'}
                           >
-                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            <Check className={`w-3.5 h-3.5 stroke-[3] ${isDone ? 'animate-check-pop' : ''}`} />
                           </button>
                         </div>
                       </div>
@@ -752,10 +749,10 @@ export function Home() {
               </div>
 
               {/* View Full Schedule CTA Button */}
-              <button 
+              <button
                 type="button"
-                onClick={() => navigate('/my-page')} 
-                className="w-full py-4 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white font-bold text-base shadow-lg shadow-orange-400/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all mt-5"
+                onClick={() => navigate('/my-page')}
+                className="w-full py-4 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white font-bold text-base shadow-lg shadow-orange-400/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 hover:-translate-y-0.5 transition-all duration-200 mt-5"
               >
                 <Calendar className="w-5 h-5" />
                 <span>Lihat rencana lengkap →</span>
@@ -787,14 +784,14 @@ export function Home() {
       {/* ========================================================================= */}
       {/* 3. SHARED EXPLORE SECTIONS: MENU & ACTIVITY RECOMMENDATIONS               */}
       {/* ========================================================================= */}
-      
+
       {/* Menu Makan Pilihan */}
       <section className="mb-8 mt-4">
         <div className="flex justify-between items-center px-4 mb-3">
           <h2 className="text-base font-bold text-neutral-800">Menu makan pilihan</h2>
-          <Link to="/explore/menu" className="text-neutral-400 hover:text-neutral-600 flex items-center gap-1 text-sm font-medium">
+          <Link to="/explore/menu" className="text-neutral-400 hover:text-orange-600 flex items-center gap-1 text-sm font-medium transition-colors group">
             <span>Lihat semua</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto px-4 pb-2 snap-x hide-scrollbar flex-nowrap">
@@ -802,15 +799,15 @@ export function Home() {
             const num = ((idx % 8) + 1).toString().padStart(2, '0');
             const imgSrc = `/img/food-${num}.png`;
             return (
-              <Link 
-                key={recipe.id || idx} 
-                to={`/explore/menu/${recipe.id}`} 
-                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100 hover:shadow-md transition-all group"
+              <Link
+                key={recipe.id || idx}
+                to={`/explore/menu/${recipe.id}`}
+                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100/90 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98]"
               >
                 <div className="w-full h-24 bg-neutral-100 rounded-xl mb-3 overflow-hidden">
-                  <img src={imgSrc} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={imgSrc} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" />
                 </div>
-                <h3 className="text-sm font-semibold text-neutral-800 leading-tight mb-3 line-clamp-2">{recipe.title}</h3>
+                <h3 className="text-sm font-semibold text-neutral-800 leading-tight mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors">{recipe.title}</h3>
                 <div className="flex flex-wrap gap-1.5 mt-auto">
                   <Badge variant="yellow">{recipe.age_range} bln</Badge>
                   <Badge variant="primary">{recipe.prep_time || 20} mnt</Badge>
@@ -825,9 +822,9 @@ export function Home() {
       <section className="mb-8">
         <div className="flex justify-between items-center px-4 mb-3">
           <h2 className="text-base font-bold text-neutral-800">Aktivitas Pilihan</h2>
-          <Link to="/explore/activity" className="text-neutral-400 hover:text-neutral-600 flex items-center gap-1 text-sm font-medium">
+          <Link to="/explore/activity" className="text-neutral-400 hover:text-orange-600 flex items-center gap-1 text-sm font-medium transition-colors group">
             <span>Lihat semua</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto px-4 pb-2 snap-x hide-scrollbar flex-nowrap">
@@ -838,15 +835,15 @@ export function Home() {
             const skill = Array.isArray(act.skills) ? act.skills[0] : (typeof act.skills === 'string' ? JSON.parse(act.skills || '[]')[0] : 'Motorik');
 
             return (
-              <Link 
-                key={act.id || idx} 
-                to={`/explore/activity/${act.id}`} 
-                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100 hover:shadow-md transition-all group"
+              <Link
+                key={act.id || idx}
+                to={`/explore/activity/${act.id}`}
+                className="w-[160px] shrink-0 snap-start bg-white rounded-2xl p-3 shadow-card-sm border border-neutral-100/90 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98]"
               >
                 <div className="w-full h-24 bg-neutral-100 rounded-xl mb-3 overflow-hidden">
-                  <img src={image} alt={act.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={image} alt={act.title} className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" />
                 </div>
-                <h3 className="text-sm font-semibold text-neutral-800 leading-tight mb-3 line-clamp-2">{act.title}</h3>
+                <h3 className="text-sm font-semibold text-neutral-800 leading-tight mb-3 line-clamp-2 group-hover:text-nakoo-green-700 transition-colors">{act.title}</h3>
                 <div className="flex flex-wrap gap-1.5 mt-auto">
                   <Badge variant="green">{act.age_range} bln</Badge>
                   {skill && <Badge variant="primary">{skill.replace('_', ' ')}</Badge>}
@@ -860,18 +857,18 @@ export function Home() {
       {/* CTA Banner (Non-logged-in only) */}
       {!user && (
         <section className="px-4 mb-8">
-          <div className="bg-gradient-to-br from-primary-50 to-nakoo-blue-50 rounded-[32px] p-5 flex flex-col items-center text-center relative overflow-hidden border border-primary-100">
-            <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2" />
+          <div className="bg-gradient-to-br from-primary-50 via-orange-50/50 to-nakoo-blue-50 rounded-[32px] p-6 flex flex-col items-center text-center relative overflow-hidden border border-primary-100 shadow-sm hover:shadow-md transition-shadow">
+            <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2 animate-float-subtle" />
 
             <h2 className="text-xl font-bold text-neutral-800 mb-3 leading-snug">
-              Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakoo-green-600">si kecil</span>
+              Sesuaikan menu dan aktivitas sesuai kebutuhan <span className="text-nakoo-green-600 font-extrabold">si kecil</span>
             </h2>
-            <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
+            <p className="text-sm text-neutral-500 mb-8 leading-relaxed max-w-[280px]">
               Isi profil singkat si kecil, dan Nakoo bantu susun rencana harian yang pas setiap hari
             </p>
 
-            <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2 cursor-pointer">
-              Daftar Sekarang <span className="font-bold text-lg leading-none">→</span>
+            <Button onClick={() => navigate('/login')} className="w-full flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary-500/30">
+              Daftar Sekarang <span className="font-bold text-lg leading-none transition-transform group-hover:translate-x-1">→</span>
             </Button>
           </div>
         </section>
@@ -881,32 +878,32 @@ export function Home() {
       <section className="px-4 mb-8">
         <h2 className="text-base font-bold text-neutral-800 mb-3">Kenapa Nakoo?</h2>
         <div className="flex flex-col gap-3">
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60">
-            <div className="w-12 h-12 shrink-0 bg-[#FFEBDB] text-[#E58639] rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+            <div className="w-12 h-12 shrink-0 bg-[#FFEBDB] text-[#E58639] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
               <img src={checkIcon} alt="Check Icon" className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-800 mb-1">Sesuai Usia</h3>
+              <h3 className="text-sm font-bold text-neutral-800 mb-1 group-hover:text-orange-600 transition-colors">Sesuai Usia</h3>
               <p className="text-xs text-neutral-500 leading-relaxed">Rekomendasi menu & main otomatis menyesuaikan usia si kecil, tanpa perlu riset sendiri.</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60">
-            <div className="w-12 h-12 shrink-0 bg-[#E4F1DF] text-[#437A32] rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+            <div className="w-12 h-12 shrink-0 bg-[#E4F1DF] text-[#437A32] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
               <img src={saveIcon} alt="Save Icon" className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-800 mb-1">Aman dari Alergen</h3>
+              <h3 className="text-sm font-bold text-neutral-800 mb-1 group-hover:text-nakoo-green-700 transition-colors">Aman dari Alergen</h3>
               <p className="text-xs text-neutral-500 leading-relaxed">Cukup catat alergi si kecil sekali, Nakoo yang saring menu setiap harinya.</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60">
-            <div className="w-12 h-12 shrink-0 bg-[#FFDBD1] text-[#B9411A] rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+            <div className="w-12 h-12 shrink-0 bg-[#FFDBD1] text-[#B9411A] rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
               <img src={tumbuhIcon} alt="Tumbuh Icon" className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-800 mb-1">Ikuti Tumbuh Kembang</h3>
+              <h3 className="text-sm font-bold text-neutral-800 mb-1 group-hover:text-nakoo-red-600 transition-colors">Ikuti Tumbuh Kembang</h3>
               <p className="text-xs text-neutral-500 leading-relaxed">Rencana harian ikut berubah seiring si kecil mencapai tahap perkembangan baru.</p>
             </div>
           </div>
@@ -915,8 +912,8 @@ export function Home() {
 
       {/* Tahukah Ibu? */}
       <section className="px-4 mb-8">
-        <div className="bg-gradient-to-r from-[#FFEBDB] to-[#FFFBF8] rounded-2xl p-4 flex items-center gap-4 border border-orange-100/60">
-          <img src={tahukahIbuImg} alt="Tahukah Ibu Icon" className="w-20 h-20 shrink-0 object-contain" />
+        <div className="bg-gradient-to-r from-[#FFEBDB] to-[#FFFBF8] rounded-2xl p-4 flex items-center gap-4 border border-orange-100/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
+          <img src={tahukahIbuImg} alt="Tahukah Ibu Icon" className="w-20 h-20 shrink-0 object-contain group-hover:scale-108 transition-transform duration-300" />
           <div>
             <h3 className="text-lg font-bold text-nakoo-green-600 mb-1 flex items-center gap-1">
               Tahukah Ibu? 🌿
@@ -946,9 +943,9 @@ export function Home() {
         title={`Atur Jadwal untuk ${profile?.child_name || 'Buah Hati'}`}
         action={
           <div className="space-y-2">
-            <Button 
-              onClick={handleConfirmGenerate} 
-              disabled={generating} 
+            <Button
+              onClick={handleConfirmGenerate}
+              disabled={generating}
               className="w-full flex items-center justify-center gap-2 bg-[#FBB040] hover:bg-[#faa020] text-white shadow-lg shadow-orange-400/25 cursor-pointer"
             >
               {generating ? (
@@ -1000,11 +997,10 @@ export function Home() {
                     key={preset.id}
                     type="button"
                     onClick={() => applyPreset(preset.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-orange-500 text-white shadow-xs scale-[1.02]'
-                        : 'bg-white text-neutral-600 border border-orange-200/80 hover:bg-orange-100/50'
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${isSelected
+                      ? 'bg-orange-500 text-white shadow-xs scale-[1.02]'
+                      : 'bg-white text-neutral-600 border border-orange-200/80 hover:bg-orange-100/50'
+                      }`}
                   >
                     {preset.label}
                   </button>
@@ -1024,13 +1020,12 @@ export function Home() {
               const badge = typeBadges[slot.type] || typeBadges.routine;
 
               return (
-                <div 
+                <div
                   key={slot.id}
-                  className={`rounded-2xl p-3 border transition-all flex items-center gap-3 ${
-                    slot.enabled 
-                      ? 'bg-white border-neutral-200 shadow-2xs' 
-                      : 'bg-neutral-50 border-neutral-200/60 opacity-55'
-                  }`}
+                  className={`rounded-2xl p-3 border transition-all flex items-center gap-3 ${slot.enabled
+                    ? 'bg-white border-neutral-200 shadow-2xs'
+                    : 'bg-neutral-50 border-neutral-200/60 opacity-55'
+                    }`}
                 >
                   {/* Emoji / Icon Box */}
                   <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-xl shrink-0">
@@ -1057,8 +1052,8 @@ export function Home() {
                     {/* Time Input */}
                     <div className="flex items-center gap-1 bg-neutral-100 hover:bg-neutral-150 px-2 py-1 rounded-xl border border-neutral-200/80 focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-100 transition-all">
                       <Clock className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                      <input 
-                        type="time" 
+                      <input
+                        type="time"
                         value={slot.time}
                         disabled={!slot.enabled}
                         onChange={(e) => updateSlotTime(slot.id, e.target.value)}
@@ -1072,11 +1067,10 @@ export function Home() {
                       <button
                         type="button"
                         onClick={() => toggleSlotEnabled(slot.id)}
-                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-colors cursor-pointer ${
-                          slot.enabled 
-                            ? 'bg-nakoo-green-50 text-nakoo-green-600 hover:bg-nakoo-green-100' 
-                            : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-200'
-                        }`}
+                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-colors cursor-pointer ${slot.enabled
+                          ? 'bg-nakoo-green-50 text-nakoo-green-600 hover:bg-nakoo-green-100'
+                          : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-200'
+                          }`}
                         title={slot.enabled ? 'Nonaktifkan jadwal ini' : 'Aktifkan jadwal ini'}
                       >
                         {slot.enabled ? <Check className="w-4 h-4 stroke-[2.5]" /> : <Plus className="w-4 h-4" />}
@@ -1166,11 +1160,10 @@ export function Home() {
                       key={c.type}
                       type="button"
                       onClick={() => setNewSlotData(prev => ({ ...prev, type: c.type, emoji: c.emoji }))}
-                      className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center border transition-all cursor-pointer ${
-                        newSlotData.type === c.type
-                          ? 'bg-orange-500 text-white border-orange-500 shadow-2xs'
-                          : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
-                      }`}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center border transition-all cursor-pointer ${newSlotData.type === c.type
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-2xs'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
+                        }`}
                     >
                       {c.label}
                     </button>
