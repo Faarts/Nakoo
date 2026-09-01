@@ -6,6 +6,30 @@ import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 
+// Safely parse skills — handles both JS array and JSON string
+function parseSkills(skills) {
+  if (Array.isArray(skills)) return skills
+  if (typeof skills === 'string') {
+    try {
+      const parsed = JSON.parse(skills)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
+
+const skillLabels = {
+  motorik_halus: 'Motorik Halus',
+  motorik_kasar: 'Motorik Kasar',
+  kognitif: 'Kognitif',
+  kreativitas: 'Kreativitas',
+  sensori: 'Sensori',
+  bahasa: 'Bahasa',
+  sosial_emosional: 'Sosial & Emosi',
+}
+
 export function ActivityDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,6 +40,8 @@ export function ActivityDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const activity = DUMMY_ACTIVITIES.find(a => a.id === id) || DUMMY_ACTIVITIES[0];
+  const skills = parseSkills(activity.skills);
+  const tags = activity.tags || skills.map(s => skillLabels[s] || s);
 
   React.useEffect(() => {
     if (user) {
@@ -80,9 +106,9 @@ export function ActivityDetail() {
           <span className="px-3 py-1 bg-nakoo-green-50 text-nakoo-green-700 text-xs font-semibold rounded-full border border-nakoo-green-100">
             {activity.age_range} bln
           </span>
-          {activity.skills.map((skill, idx) => (
-            <span key={idx} className="px-3 py-1 bg-[#FFF5EB] text-orange-700 text-xs font-semibold rounded-full border border-orange-100 uppercase tracking-wider">
-              {skill.replace('_', ' ')}
+          {tags.map((tag, idx) => (
+            <span key={idx} className="px-3 py-1 bg-[#FFF5EB] text-orange-700 text-xs font-semibold rounded-full border border-orange-100">
+              {tag}
             </span>
           ))}
         </div>

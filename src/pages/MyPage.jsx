@@ -3,14 +3,14 @@ import { useAuth } from '../lib/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
-import { Calendar, Heart, User, CheckCircle2, Clock, ChevronRight, RefreshCw, Settings, Ban, Target } from 'lucide-react';
+import { Calendar, Heart, User, CheckCircle2, Clock, ChevronRight, RefreshCw, Settings, Ban, Target, LogOut } from 'lucide-react';
 import { Card } from '../components/Card';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 
 export function MyPage() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, logout } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   
@@ -33,6 +33,7 @@ export function MyPage() {
   const [alergies, setAlergies] = useState([]);
   const [skills, setSkills] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -176,14 +177,30 @@ export function MyPage() {
   return (
     <div className="pb-24 bg-neutral-50 min-h-screen">
       {/* Header Profile */}
-      <div className="bg-white pt-10 pb-6 px-6 rounded-b-[32px] shadow-sm mb-6">
+      <div className="bg-white pt-6 pb-6 px-6 rounded-b-[32px] shadow-sm mb-6 border-b border-neutral-100/60">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-nakoo-green-100 flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
-            <User className="w-8 h-8 text-nakoo-green-600" />
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-sm overflow-hidden">
+              <img 
+                src="/img/mother-avatar.jpg" 
+                alt="Profil Bunda" 
+                className="w-full h-full object-cover rounded-full" 
+              />
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-nakoo-green-500 border-2 border-white flex items-center justify-center text-white shadow-xs">
+              <Heart className="w-2.5 h-2.5 fill-white" />
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-neutral-900">{profile?.child_name || 'Anak Anda'}</h1>
-            <p className="text-sm text-neutral-500">Lahir: {profile?.birth_date || '-'}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold text-neutral-900 truncate">
+              {user?.name || 'Bunda'}
+            </h1>
+            <p className="text-sm font-medium text-nakoo-green-700 truncate">
+              Anak: <span className="font-semibold">{profile?.child_name || 'Si Kecil'}</span>
+            </p>
+            <p className="text-xs text-neutral-400">
+              Lahir: {profile?.birth_date || '-'}
+            </p>
           </div>
         </div>
         
@@ -431,7 +448,7 @@ export function MyPage() {
                 </div>
               </Card>
 
-              <div className="pb-4">
+              <div className="pb-4 flex flex-col gap-3">
                 <Button 
                   type="submit" 
                   fullWidth 
@@ -439,6 +456,18 @@ export function MyPage() {
                 >
                   Simpan Perubahan
                 </Button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logout();
+                    navigate('/login');
+                  }}
+                  className="w-full py-3 rounded-2xl border border-red-200 bg-red-50/50 hover:bg-red-50 text-red-600 font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Keluar dari Akun</span>
+                </button>
               </div>
             </form>
           </div>

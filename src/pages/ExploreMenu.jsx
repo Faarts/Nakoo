@@ -10,7 +10,7 @@ import { Badge } from '../components/Badge';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
-import { Heart, AlertTriangle, SlidersHorizontal, ArrowRight } from 'lucide-react';
+import { Heart, AlertTriangle, SlidersHorizontal, ArrowRight, Plus } from 'lucide-react';
 import { DUMMY_RECIPES } from '../../.mock/recipes';
 import category01 from '../assets/img/category 01.png';
 import category02 from '../assets/img/category 02.png';
@@ -46,6 +46,7 @@ export function ExploreMenu() {
   const [recipes, setRecipes] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addingId, setAddingId] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -114,6 +115,22 @@ export function ExploreMenu() {
       }
     } catch (e) {
       showToast("Gagal mengubah favorit", "error");
+    }
+  };
+
+  const addToPlan = async (recipe) => {
+    if (!user) {
+      showToast("Silakan masuk (login) untuk menambahkan ke rencana", "error");
+      return;
+    }
+    setAddingId(recipe.id);
+    try {
+      await api.post('/api/daily-plans/add-recipe', { recipe_id: recipe.id });
+      showToast("Ditambahkan ke rencana hari ini", "success");
+    } catch (e) {
+      showToast("Gagal menambahkan ke rencana", "error");
+    } finally {
+      setAddingId(null);
     }
   };
 
@@ -309,6 +326,19 @@ export function ExploreMenu() {
                               <Badge variant="yellow" className="!px-1.5 !py-0.5 !text-[10px] bg-primary-50 text-primary-700 font-medium">{recipe.age_range} bln</Badge>
                               {recipe.prep_time && <Badge variant="default" className="!px-1.5 !py-0.5 !text-[10px] font-medium">{recipe.prep_time} mnt</Badge>}
                             </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                addToPlan(recipe);
+                              }}
+                              disabled={addingId === recipe.id}
+                              className="mt-2 w-full py-2 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-all disabled:opacity-60"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              {addingId === recipe.id ? 'Menambahkan...' : 'Tambahkan rencana'}
+                            </button>
                           </div>
                         </Card>
                       </Link>
