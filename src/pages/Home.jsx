@@ -686,7 +686,7 @@ export function Home() {
                       {/* Connecting line behind avatars */}
                       {!isLast && (
                         <div
-                          className={`absolute left-[23px] top-6 bottom-[-22px] z-0 pointer-events-none ${
+                          className={`absolute left-[30px] -translate-x-1/2 top-6 bottom-[-22px] z-0 pointer-events-none ${
                             isDone && (nextSlot?.isDone || nextSlot?.isCurrent)
                               ? 'w-0.5 bg-[#D4A882]'
                               : isCurrent
@@ -700,7 +700,7 @@ export function Home() {
                       <div
                         className={`relative z-10 flex items-center justify-between rounded-[24px] transition-all duration-300 ${
                           isCurrent
-                            ? 'bg-[#EAF5EC] border border-nakoo-green-200/80 p-3 -mx-2 shadow-xs animate-pulse-glow'
+                            ? 'bg-[#EAF5EC] border border-nakoo-green-200/80 pl-3.5 pr-3 py-3 -mx-2 shadow-xs animate-pulse-glow'
                             : 'p-1.5 hover:bg-neutral-50/80'
                         }`}
                       >

@@ -26,13 +26,13 @@ export function BottomSheet({
     <div className="fixed inset-0 z-40 flex flex-col justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/45 backdrop-blur-sm animate-in fade-in duration-300"
+        className="absolute inset-0 bg-black/45 backdrop-blur-xs animate-backdrop-fade"
         onClick={onClose}
         aria-hidden="true"
       />
       
       {/* Modal Sheet */}
-      <div className="relative w-full max-w-md mx-auto bg-white rounded-t-[32px] shadow-2xl max-h-[88vh] flex flex-col animate-in slide-in-from-bottom duration-300 ease-out pb-safe border-t border-neutral-100">
+      <div className="relative w-full max-w-md mx-auto bg-white rounded-t-[32px] shadow-2xl max-h-[88vh] flex flex-col animate-slide-up-sheet pb-safe border-t border-neutral-100 will-change-transform">
         {/* Drag Handle */}
         <div className="flex justify-center pt-3.5 pb-1.5 w-full cursor-grab">
           <div className="w-12 h-1.5 bg-neutral-300 hover:bg-neutral-400 rounded-full transition-colors" />

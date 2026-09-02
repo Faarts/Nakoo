@@ -166,7 +166,7 @@ export function FilterBottomSheet({ isOpen, onClose, onApply, type = 'food' }) {
                 </div>
               </button>
               {expandedSection.bahanUtama && (
-                <div className="flex flex-wrap gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="flex flex-wrap gap-2 animate-slide-up-fade">
                   {['Sayuran', 'Buah', 'Daging', 'Ikan', 'Telur', 'Seafood', 'Susu', 'Keju', 'Kacang', 'Alpukat'].map(bahan => {
                     const isActive = filters.bahanUtama.includes(bahan);
                     return (
@@ -210,7 +210,7 @@ export function FilterBottomSheet({ isOpen, onClose, onApply, type = 'food' }) {
                 </div>
               </button>
               {expandedSection.alergen && (
-                <div className="flex flex-wrap gap-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="flex flex-wrap gap-2 animate-slide-up-fade">
                   {['Tanpa Telur', 'Tanpa Susu', 'Tanpa Kacang', 'Tanpa Gluten'].map(alergen => {
                     const isActive = filters.alergen.includes(alergen);
                     return (
