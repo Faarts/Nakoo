@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 import { Button } from '../components/Button';
@@ -47,6 +47,7 @@ function ChipSelect({ options, selected, onChange }) {
 export function SetupProfile() {
   const { refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [childName, setChildName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -79,7 +80,7 @@ export function SetupProfile() {
       });
       
       await refreshProfile();
-      navigate('/', { replace: true });
+      navigate(location.state?.from || '/', { replace: true });
 
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat menyimpan profil');

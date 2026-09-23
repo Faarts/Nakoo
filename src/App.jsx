@@ -1,3 +1,4 @@
+import { ScrollToPage } from './components/ScrollToPage'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './lib/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -22,11 +23,12 @@ function App() {
       <ToastProvider>
         <AuthProvider>
           <Router>
+            <ScrollToPage />
             <div className="mx-auto max-w-md bg-white min-h-screen relative">
               <OfflineIndicator />
               <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/setup-profile" element={<SetupProfile />} />
+              <Route element={<ProtectedRoute />}><Route path="/setup-profile" element={<SetupProfile />} /></Route>
               <Route path="/design" element={<DesignPreview />} />
 
               {/* Rute Publik Tanpa Layout (Full Screen) */}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bell, Menu, User, Settings, LogOut, Info, LogIn } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Bell, Menu, User, Settings, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import logo from '../assets/nako-logo.svg';
 
@@ -12,9 +12,9 @@ export function TopBar({ className = '', isLoggedIn = true }) {
 
   return (
     <>
-      <header className={`relative z-50 flex items-center justify-between px-4 py-3 bg-transparent ${className}`}>
+      <header className={`relative z-50 flex items-center justify-between px-5 py-5 bg-transparent ${className}`}>
         {/* Logo */}
-        <img src={logo} alt="Nakoo Logo" className="h-6 w-auto relative z-10" />
+        <Link to="/" aria-label="Nakoo, beranda" className="block w-12 h-10 overflow-hidden"><img src={logo} alt="" className="h-9 w-auto max-w-none" /></Link>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 relative z-10">
@@ -25,11 +25,10 @@ export function TopBar({ className = '', isLoggedIn = true }) {
               setIsMenuOpen(false);
             }}
             className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakoo-green-600 hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white"
-            aria-label="Notifikasi"
+            aria-label="Notifikasi" aria-expanded={isNotificationOpen}
           >
             <Bell className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
             {/* Notification Badge */}
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
           </button>
           <button
             type="button"
@@ -38,7 +37,7 @@ export function TopBar({ className = '', isLoggedIn = true }) {
               setIsNotificationOpen(false);
             }}
             className="w-11 h-11 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white text-nakoo-green-600 hover:bg-neutral-50 active:scale-95 transition-all"
-            aria-label="Menu"
+            aria-label="Menu" aria-expanded={isMenuOpen}
           >
             <Menu className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
           </button>
@@ -46,31 +45,14 @@ export function TopBar({ className = '', isLoggedIn = true }) {
 
         {/* Dropdown Modals */}
         {isNotificationOpen && (
-          <div className="absolute right-4 top-16 w-80 bg-white rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right">
+          <div className="absolute right-4 top-16 w-80 max-w-[calc(100vw-40px)] bg-white rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right">
             <div className="p-4 border-b border-neutral-100">
               <h3 className="font-semibold text-neutral-800">Notifikasi</h3>
             </div>
-            <div className="flex flex-col p-2 max-h-[70vh] overflow-y-auto">
-              <div className="flex gap-3 items-start p-3 bg-primary-50 rounded-xl hover:bg-primary-100 transition-colors cursor-pointer group">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                   <Bell className="w-5 h-5 text-primary-500" />
-                </div>
-                <div className="group-hover:translate-x-1 transition-transform duration-300">
-                  <p className="text-sm font-medium text-neutral-800">Waktunya Makan Siang!</p>
-                  <p className="text-xs text-neutral-500 mt-0.5">Menu Pasta Daging Sapi Sayuran sudah menanti si kecil.</p>
-                  <span className="text-[10px] text-neutral-400 mt-2 block">10 menit yang lalu</span>
-                </div>
-              </div>
-              <div className="flex gap-3 items-start p-3 bg-white rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer group">
-                <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                   <Info className="w-5 h-5 text-neutral-500" />
-                </div>
-                <div className="group-hover:translate-x-1 transition-transform duration-300">
-                  <p className="text-sm font-medium text-neutral-800">Aktivitas Baru Tersedia</p>
-                  <p className="text-xs text-neutral-500 mt-0.5">Cek rekomendasi aktivitas sensorik terbaru untuk usia 2 tahun.</p>
-                  <span className="text-[10px] text-neutral-400 mt-2 block">2 jam yang lalu</span>
-                </div>
-              </div>
+            <div className="p-6 text-center">
+              <Bell className="size-8 mx-auto mb-3 text-nakoo-green-500" />
+              <p className="text-sm font-medium">Belum ada notifikasi baru</p>
+              <p className="text-xs text-neutral-500 mt-2">Rencana si kecil dapat dilihat di Beranda.</p>
             </div>
           </div>
         )}

@@ -47,8 +47,6 @@
 
   --color-nakoo-icon: #C4654A;
 
-  /* Neutral palette uses Tailwind's default neutral (Warm Gray), we just redefine some for consistency if needed. 
-     Tailwind v4 already provides neutral. We will rely on default neutral colors. */
   --color-neutral-800: #4C4C4C;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -58,7 +56,26 @@
   --shadow-card-sm: 0 2px 12px rgba(0, 0, 0, 0.03);
   --shadow-item: 0 4px 16px rgba(196, 101, 74, 0.04);
   --shadow-inner-white: inset 0 4px 12px white;
-  --shadow-nav: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  --shadow-nav: 0 -2px 16px rgba(0, 0, 0, 0.07);
+}
+
+/* ============================================================
+   MOTION DESIGN TOKENS — Global animation consistency
+   All durations/easings reference these tokens.
+   ============================================================ */
+:root {
+  /* Duration scale */
+  --duration-instant:  100ms;
+  --duration-fast:     160ms;
+  --duration-base:     250ms;
+  --duration-slow:     380ms;
+  --duration-xslow:    500ms;
+
+  /* Easing tokens */
+  --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);   /* overshoot — enter */
+  --ease-out-quint:    cubic-bezier(0.22, 1, 0.36, 1);      /* smooth decel — enter */
+  --ease-in-quint:     cubic-bezier(0.64, 0, 0.78, 0);      /* smooth accel — exit */
+  --ease-out-back:     cubic-bezier(0.34, 1.2, 0.64, 1);    /* soft overshoot */
 }
 
 /* Global Styles */
@@ -70,179 +87,401 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  button, a { touch-action: manipulation; }
+  button:not(:disabled), a { cursor: pointer; }
+  button:disabled { cursor: wait; opacity: .55; }
+  :focus-visible { outline: 2px solid var(--color-nakoo-green-600); outline-offset: 3px; }
+  input, select, textarea { font-size: 16px; }
+  input[type='search']::-webkit-search-cancel-button { display: none; }
 }
 
-/* Utilities & Micro-Animations */
+/* ============================================================
+   UTILITIES & MICRO-ANIMATIONS
+   ============================================================ */
 @layer utilities {
+  /* ---- Scrollbar hiding ---- */
   .hide-scrollbar::-webkit-scrollbar,
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
   .hide-scrollbar,
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  /* Micro-animation Utilities */
+  /* ---- Named animation utilities ---- */
   .animate-heart-burst {
-    animation: heartBurst 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: heartBurst 0.45s var(--ease-spring) forwards;
   }
-
   .animate-check-pop {
-    animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: checkPop 0.4s var(--ease-spring) forwards;
   }
-
   .animate-pulse-glow {
     animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
-
   .animate-float-subtle {
     animation: floatSubtle 3s ease-in-out infinite;
   }
-
   .animate-wiggle {
     animation: wiggle 0.6s ease-in-out;
   }
-
   .animate-bounce-once {
-    animation: bounceOnce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: bounceOnce 0.5s var(--ease-spring);
   }
-
   .animate-scale-in {
-    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: scaleIn var(--duration-base) var(--ease-out-quint) forwards;
   }
-
   .animate-slide-up-fade {
-    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUpFade var(--duration-base) var(--ease-out-quint) forwards;
   }
 
+  /* Bottom sheet — ENTER */
   .animate-slide-up-sheet {
-    animation: slideUpSheet 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUpSheet var(--duration-slow) var(--ease-out-quint) forwards;
+    will-change: transform, opacity;
+  }
+  /* Bottom sheet — EXIT */
+  .animate-slide-down-sheet {
+    animation: slideDownSheet 220ms var(--ease-in-quint) forwards;
     will-change: transform, opacity;
   }
 
+  /* Backdrop */
   .animate-backdrop-fade {
-    animation: backdropFadeIn 0.3s ease-out forwards;
+    animation: backdropFadeIn var(--duration-base) ease-out forwards;
+  }
+  .animate-backdrop-fade-out {
+    animation: backdropFadeOut 200ms ease-in forwards;
   }
 
+  /* Skeleton shimmer */
   .animate-shimmer-sweep {
     background-size: 200% 100%;
     animation: shimmerSweep 2s linear infinite;
   }
+
+  /* Toast — slide from bottom */
+  .animate-toast-in {
+    animation: toastSlideIn var(--duration-base) var(--ease-out-quint) forwards;
+  }
+  .animate-toast-out {
+    animation: toastSlideOut 200ms var(--ease-in-quint) forwards;
+  }
+
+  /* Nav icon pop on activation */
+  .animate-nav-pop {
+    animation: navPop var(--duration-base) var(--ease-spring) forwards;
+  }
+
+  /* Stagger helpers — used via style={{ animationDelay }} */
+  .animate-stagger-in {
+    animation: slideUpFade var(--duration-slow) var(--ease-out-quint) both;
+  }
+
+  /* Page section fade-in */
+  .animate-page-section {
+    animation: pageSectionIn var(--duration-slow) var(--ease-out-quint) both;
+  }
+
+  /* Subtle scale feedback on press for cards */
+  .press-scale {
+    transition: transform var(--duration-instant) ease-out;
+  }
+  .press-scale:active {
+    transform: scale(0.97);
+  }
 }
 
-/* Keyframes */
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
 @keyframes slideUpSheet {
-  0% {
-    transform: translateY(100%);
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  0%   { transform: translateY(100%); opacity: 0.5; }
+  100% { transform: translateY(0);    opacity: 1;   }
+}
+
+@keyframes slideDownSheet {
+  0%   { transform: translateY(0);    opacity: 1;   }
+  100% { transform: translateY(100%); opacity: 0;   }
 }
 
 @keyframes backdropFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
+
+@keyframes backdropFadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 @keyframes heartBurst {
-  0% {
-    transform: scale(1);
-  }
-  30% {
-    transform: scale(1.35) rotate(-6deg);
-  }
-  60% {
-    transform: scale(0.9) rotate(4deg);
-  }
-  100% {
-    transform: scale(1) rotate(0);
-  }
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.35) rotate(-6deg); }
+  60%  { transform: scale(0.9) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
 }
 
 @keyframes checkPop {
-  0% {
-    transform: scale(0.3) rotate(-20deg);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.28) rotate(6deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
+  0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.28) rotate(6deg);  opacity: 1; }
+  100% { transform: scale(1) rotate(0);         opacity: 1; }
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(125, 170, 109, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(125, 170, 109, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(125, 170, 109, 0.45); }
+  50%       { box-shadow: 0 0 0 8px rgba(125, 170, 109, 0); }
 }
 
 @keyframes floatSubtle {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
 }
 
 @keyframes wiggle {
   0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-8deg); }
-  40% { transform: rotate(8deg); }
-  60% { transform: rotate(-5deg); }
-  80% { transform: rotate(5deg); }
+  20%       { transform: rotate(-8deg); }
+  40%       { transform: rotate(8deg); }
+  60%       { transform: rotate(-5deg); }
+  80%       { transform: rotate(5deg); }
 }
 
 @keyframes bounceOnce {
-  0% { transform: scale(0.7); opacity: 0; }
-  50% { transform: scale(1.15); }
-  75% { transform: scale(0.95); }
+  0%   { transform: scale(0.7); opacity: 0; }
+  50%  { transform: scale(1.15); }
+  75%  { transform: scale(0.95); }
   100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes scaleIn {
-  0% {
-    transform: scale(0.92);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0%   { transform: scale(0.93); opacity: 0; }
+  100% { transform: scale(1);    opacity: 1; }
 }
 
 @keyframes slideUpFade {
-  0% {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  0%   { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes pageSectionIn {
+  0%   { transform: translateY(16px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
 }
 
 @keyframes shimmerSweep {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Toast animations — slides from bottom */
+@keyframes toastSlideIn {
+  0%   { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+  0%   { transform: translateY(0);    opacity: 1; }
+  100% { transform: translateY(20px); opacity: 0; }
+}
+
+/* Nav icon pop */
+@keyframes navPop {
+  0%   { transform: scale(1)    translateY(0); }
+  40%  { transform: scale(1.25) translateY(-3px); }
+  70%  { transform: scale(0.9)  translateY(0); }
+  100% { transform: scale(1.1)  translateY(-1px); }
+}
+
+/* ============================================================
+   LAYOUT & SURFACE CLASSES
+   ============================================================ */
+@theme {
+  --color-nakoo-surface: #FFFBF8;
+  --color-nakoo-lilac:   #F8EBFC;
+  --color-nakoo-mist:    #E8F3F2;
+}
+
+.app-surface {
+  background: radial-gradient(ellipse 100% 260px at 75% 0, var(--color-nakoo-mist), transparent), var(--color-nakoo-surface);
+  min-height: 100dvh;
+}
+.app-layout     { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+.pb-safe        { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.catalog-page   { padding-bottom: 24px; }
+
+/* ============================================================
+   CATALOG CARD & CAROUSEL
+   ============================================================ */
+.catalog-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: white;
+  padding: 11px;
+  border: 1px solid var(--color-neutral-100);
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgb(208 132 110 / .04);
+  transition: transform var(--duration-fast) ease-out, box-shadow var(--duration-fast) ease-out;
+}
+.catalog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgb(208 132 110 / .10);
+}
+.catalog-card:active { transform: scale(0.97); }
+
+.catalog-card-featured  { width: 212px; flex-shrink: 0; scroll-snap-align: start; }
+.catalog-carousel       { display: flex; gap: 12px; padding: 0 20px 5px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 20px; }
+.catalog-image          { aspect-ratio: 1.45; border-radius: 12px; overflow: hidden; background: var(--color-primary-50); margin-bottom: 11px; }
+.catalog-image img      { width: 100%; height: 100%; object-fit: cover; transition: transform var(--duration-slow) ease-out; }
+.catalog-card:hover .catalog-image img { transform: scale(1.05); }
+.catalog-card-title     { font-size: 14px; font-weight: 500; line-height: 1.35; min-height: 38px; overflow-wrap: anywhere; }
+.catalog-favorite {
+  position: absolute; top: 12px; right: 12px;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgb(255 255 255 / .92);
+  transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) ease-out;
+}
+.catalog-favorite:hover   { transform: scale(1.1); box-shadow: 0 4px 12px rgb(0 0 0 / .10); }
+.catalog-favorite:active  { transform: scale(0.9); }
+
+/* ============================================================
+   FILTER CHIPS & TAGS
+   ============================================================ */
+.catalog-tag {
+  display: inline-flex; align-items: center;
+  padding: 5px 9px; border-radius: 999px;
+  font-size: 11px; line-height: 1.3;
+}
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  flex-shrink: 0; min-height: 40px;
+  border-radius: 999px; padding: 8px 13px;
+  font-size: 13px; font-weight: 400; white-space: nowrap;
+  border: 1px solid transparent;
+  transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) ease-out;
+}
+.filter-chip:active { transform: scale(0.96); }
+
+.tone-cream { background: var(--color-primary-50);       color: var(--color-primary-900); }
+.tone-lilac { background: var(--color-nakoo-lilac);       color: var(--color-neutral-800); }
+.tone-green { background: var(--color-nakoo-green-50);    color: var(--color-nakoo-green-800); }
+.tone-rose  { background: var(--color-nakoo-red-50);      color: var(--color-nakoo-red-800); }
+.tone-blue  { background: var(--color-nakoo-blue-50);     color: var(--color-nakoo-blue-800); }
+
+.filter-chip.is-selected {
+  border-color: currentColor;
+  box-shadow: inset 0 0 0 .5px currentColor;
+  transform: scale(1.02);
+  font-weight: 500;
+}
+
+.filter-trigger {
+  position: relative; flex-shrink: 0;
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: white; color: var(--color-nakoo-green-700);
+  box-shadow: 0 3px 14px rgb(125 170 109 / .08);
+  transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) ease-out;
+}
+.filter-trigger:hover   { box-shadow: 0 5px 18px rgb(125 170 109 / .16); }
+.filter-trigger:active  { transform: scale(0.92); }
+
+.filter-count {
+  position: absolute; top: -2px; right: -2px;
+  min-width: 18px; height: 18px; padding: 0 4px; border-radius: 50%;
+  background: var(--color-nakoo-red-500); color: white; font-size: 10px;
+}
+
+/* ============================================================
+   CATEGORY OPTIONS
+   ============================================================ */
+.category-option {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; gap: 8px; font-size: 11px;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+.category-option:active { transform: scale(0.93); }
+.category-option > span:first-child {
+  width: 64px; height: 64px;
+  background: var(--color-primary-50); border-radius: 24px;
+  display: grid; place-items: center;
+  border: 1px solid transparent;
+  transition: border-color var(--duration-base) ease, background var(--duration-base) ease, transform var(--duration-fast) var(--ease-spring);
+}
+.category-option img { width: 52px; height: 52px; object-fit: contain; }
+.category-option.is-selected > span:first-child {
+  border-color: var(--color-primary-400);
+  background: var(--color-primary-100);
+  transform: scale(1.05);
+}
+.category-option.is-selected { font-weight: 600; }
+
+/* ============================================================
+   BOTTOM SHEET (dialog element)
+   ============================================================ */
+.nakoo-sheet {
+  position: fixed; inset: 0;
+  width: 100%; max-width: none;
+  height: 100dvh; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  background: transparent; color: inherit;
+}
+.nakoo-sheet[open] { display: flex; align-items: flex-end; }
+.nakoo-sheet::backdrop {
+  background: rgb(28 25 23 / .45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.sheet-panel {
+  width: 100%;
+  max-width: 448px;
+  max-height: min(92dvh, 880px);
+  margin: 0 auto;
+  background: white;
+  border-radius: 28px 28px 0 0;
+  display: flex;
+  flex-direction: column;
+  /* animation is controlled via JS-added class */
+}
+.sheet-action  { padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
+.detail-footer { padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
+
+/* ============================================================
+   HOME QUICK GRID
+   ============================================================ */
+.home-quick-grid { height: 290px; }
+.home-quick-grid > a { min-height: 0; padding: 16px; border: 0; }
+.home-quick-grid > a > div:first-child { max-height: 160px; margin-bottom: 8px; }
+.home-quick-grid > div { min-height: 0; gap: 12px; }
+.home-quick-grid > div > a { min-height: 0; padding: 12px 14px; border: 0; }
+.home-quick-grid > div > a img { max-height: 66px; width: 80px; object-fit: contain; }
+.home-quick-grid > div > a > div:first-child { position: absolute; top: 10px; right: 10px; }
+.home-quick-grid > div > a > div:nth-child(2) { height: 62px; width: 76px; margin: 0 0 6px; }
+.home-quick-grid > div > a h3 { font-weight: 500; }
+
+@media (max-width: 359px) {
+  .home-quick-grid { height: 280px; }
+  .catalog-card { padding: 9px; }
+  .catalog-favorite { top: 8px; right: 8px; }
+}
+
+/* ============================================================
+   REDUCED MOTION — disable all animations
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }

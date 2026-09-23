@@ -1,9 +1,10 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 
 export function ProtectedRoute() {
-  const { user, loading } = useAuth();
+  const location = useLocation();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -15,8 +16,11 @@ export function ProtectedRoute() {
 
   if (!user) {
     // Redirect ke login jika belum ada session
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
+  if (!profile && location.pathname !== '/setup-profile') {
+    return <Navigate to="/setup-profile" state={{ from: location.pathname + location.search }} replace />;
+  }
   return <Outlet />;
 }

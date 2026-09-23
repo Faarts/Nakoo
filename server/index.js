@@ -8,7 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const db = new Database(path.join(__dirname, "nakoo.db"));
+const db = new Database(process.env.NAKOO_DB_PATH || path.join(__dirname, "nakoo.db"));
 db.pragma("journal_mode = WAL");
 
 db.exec(`
@@ -480,17 +480,15 @@ app.post("/api/daily-plans/add-recipe", (req, res) => {
   const plan = db.prepare("SELECT * FROM daily_plans WHERE user_id = ? AND date = ?").get(uid, today);
   const slots = plan ? JSON.parse(plan.slots || "[]") : [];
 
-  const mealTypeIndex = { breakfast: 0, lunch: 1, dinner: 2 };
-  const mealTime = { breakfast: '07:00', lunch: '12:00', dinner: '18:00' };
-  const mealSlots = slots.filter(s => s.type === 'meal');
-
-  if (mealTypeIndex[recipe.type] !== undefined && mealSlots[mealTypeIndex[recipe.type]]) {
-    // ganti slot menu yang sesuai (breakfast/lunch/dinner)
-    mealSlots[mealTypeIndex[recipe.type]].item_id = recipe_id;
+  const mealTime = { breakfast: '07:00', lunch: '12:00', dinner: '18:00', snack: '10:00' };
+  const existing = slots.find(slot => slot.type === 'meal' && db.prepare("SELECT type FROM recipes WHERE id = ?").get(slot.item_id)?.type === recipe.type);
+  if (existing) {
+    existing.item_id = recipe_id;
+    existing.status = 'pending';
   } else {
-    // snack / slot belum ada → append slot tambahan
     slots.push({ time: mealTime[recipe.type] || '10:00', type: 'meal', item_id: recipe_id, status: 'pending' });
   }
+  slots.sort((a, b) => a.time.localeCompare(b.time));
 
   if (plan) {
     db.prepare("UPDATE daily_plans SET slots = ? WHERE id = ?").run(JSON.stringify(slots), plan.id);
@@ -498,6 +496,27 @@ app.post("/api/daily-plans/add-recipe", (req, res) => {
     db.prepare("INSERT INTO daily_plans (id, user_id, date, slots) VALUES (?,?,?,?)").run(uuid(), uid, today, JSON.stringify(slots));
   }
 
+  res.json({ ok: true });
+});
+
+app.post("/api/daily-plans/add-activity", (req, res) => {
+  const uid = userIdFrom(req);
+  if (!uid) return res.status(401).json({ error: "Tidak terautentikasi" });
+  const { activity_id } = req.body;
+  if (!activity_id) return res.status(400).json({ error: "activity_id wajib diisi" });
+  const activity = db.prepare("SELECT id FROM activities WHERE id = ?").get(activity_id);
+  if (!activity) return res.status(404).json({ error: "Aktivitas tidak ditemukan" });
+  const today = new Date().toISOString().split('T')[0];
+  const plan = db.prepare("SELECT * FROM daily_plans WHERE user_id = ? AND date = ?").get(uid, today);
+  const slots = plan ? JSON.parse(plan.slots || "[]") : [];
+  if (!slots.some(slot => slot.type === 'activity' && slot.item_id === activity_id)) {
+    const existing = slots.find(slot => slot.type === 'activity' && slot.status !== 'done');
+    if (existing) { existing.item_id = activity_id; existing.status = 'pending'; }
+    else slots.push({ time: '09:00', type: 'activity', item_id: activity_id, status: 'pending' });
+  }
+  slots.sort((a, b) => a.time.localeCompare(b.time));
+  if (plan) db.prepare("UPDATE daily_plans SET slots = ? WHERE id = ?").run(JSON.stringify(slots), plan.id);
+  else db.prepare("INSERT INTO daily_plans (id, user_id, date, slots) VALUES (?,?,?,?)").run(uuid(), uid, today, JSON.stringify(slots));
   res.json({ ok: true });
 });
 

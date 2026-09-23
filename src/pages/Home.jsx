@@ -349,88 +349,16 @@ export function Home() {
       return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     };
 
-    const hasCustomSlots = backendSlots.some(s => s.name || s.type === 'routine');
-    let scheduleList = [];
-
-    if (hasCustomSlots) {
-      scheduleList = backendSlots.map((slot, idx) => {
-        const startMin = parseMinutes(slot.time, 7 * 60 + idx * 120);
-        return {
-          backendIndex: idx,
-          name: slot.name || (slot.type === 'meal' ? 'Makan' : slot.type === 'activity' ? 'Main' : 'Rutinitas'),
-          time: slot.time || '08:00',
-          iconEmoji: slot.iconEmoji || (slot.type === 'meal' ? '🥣' : slot.type === 'activity' ? '🧩' : '🌙'),
-          desc: slot.item?.title || slot.desc || 'Aktivitas si kecil',
-          status: slot.status || 'pending',
-          startMin,
-          type: slot.type
-        };
-      });
-    } else {
-      // Legacy 5-slot format
-      scheduleList = [
-        {
-          backendIndex: 0,
-          name: 'Sarapan',
-          time: backendSlots[0]?.time || '07:00',
-          iconEmoji: '🥣',
-          desc: backendSlots[0]?.item?.title || 'Bubur sayur + susu UHT',
-          status: backendSlots[0]?.status || 'pending',
-          startMin: parseMinutes(backendSlots[0]?.time, 7 * 60),
-          type: 'meal'
-        },
-        {
-          backendIndex: 1,
-          name: 'Main Pagi',
-          time: backendSlots[1]?.time || '09:00',
-          iconEmoji: '🧩',
-          desc: backendSlots[1]?.item?.title || 'Puzzle & balok warna',
-          status: backendSlots[1]?.status || 'pending',
-          startMin: parseMinutes(backendSlots[1]?.time, 9 * 60),
-          type: 'activity'
-        },
-        {
-          backendIndex: 2,
-          name: 'Makan Siang',
-          time: backendSlots[2]?.time || '11:30',
-          iconEmoji: '🍛',
-          desc: backendSlots[2]?.item?.title || 'Nasi tim ayam + brokoli',
-          status: backendSlots[2]?.status || 'pending',
-          startMin: parseMinutes(backendSlots[2]?.time, 11 * 60 + 30),
-          type: 'meal'
-        },
-        {
-          backendIndex: -1,
-          name: 'Tidur Siang',
-          time: '13:00',
-          iconEmoji: '🌙',
-          desc: 'Istirahat di kamar',
-          status: currentMinutes >= 15 * 60 ? 'done' : 'pending',
-          startMin: 13 * 60,
-          type: 'routine'
-        },
-        {
-          backendIndex: 3,
-          name: 'Main Sore',
-          time: backendSlots[3]?.time || '15:30',
-          iconEmoji: '⚽',
-          desc: backendSlots[3]?.item?.title || 'Halaman / taman bermain',
-          status: backendSlots[3]?.status || 'pending',
-          startMin: parseMinutes(backendSlots[3]?.time, 15 * 60 + 30),
-          type: 'activity'
-        },
-        {
-          backendIndex: 4,
-          name: 'Makan Malam',
-          time: backendSlots[4]?.time || '18:00',
-          iconEmoji: '🍲',
-          desc: backendSlots[4]?.item?.title || 'Sup + roti gandum',
-          status: backendSlots[4]?.status || 'pending',
-          startMin: parseMinutes(backendSlots[4]?.time, 18 * 60),
-          type: 'meal'
-        }
-      ];
-    }
+    const scheduleList = backendSlots.map((slot, idx) => ({
+      backendIndex: idx,
+      name: slot.name || (slot.type === 'meal' ? 'Waktu makan' : slot.type === 'activity' ? 'Waktu bermain' : 'Rutinitas'),
+      time: slot.time || '08:00',
+      iconEmoji: slot.iconEmoji || (slot.type === 'meal' ? '🥣' : slot.type === 'activity' ? '🧩' : '🌙'),
+      desc: slot.item?.title || slot.desc || 'Rutinitas si kecil',
+      status: slot.status || 'pending',
+      startMin: parseMinutes(slot.time, 7 * 60 + idx * 120),
+      type: slot.type
+    }));
 
     scheduleList.sort((a, b) => a.startMin - b.startMin);
 
@@ -438,9 +366,9 @@ export function Home() {
       const nextItem = scheduleList[idx + 1];
       const endMin = nextItem ? nextItem.startMin : item.startMin + 90;
       const isCurrent = currentMinutes >= item.startMin && currentMinutes < endMin;
-      // Otomatis tercentang jika jamnya sudah terlewati
+      // Status selesai hanya mengikuti konfirmasi pengguna
       const isTimePassed = currentMinutes >= endMin || (currentMinutes > item.startMin && !isCurrent);
-      const isDone = item.status === 'done' || isTimePassed;
+      const isDone = item.status === 'done';
 
       return {
         ...item,
@@ -454,30 +382,37 @@ export function Home() {
 
   const hydratedSchedule = buildHydratedSchedule();
   const completedCount = hydratedSchedule.filter(s => s.isDone).length;
-  const totalSlotsCount = hydratedSchedule.length || 6;
+  const totalSlotsCount = hydratedSchedule.length;
 
   return (
-    <div className="flex flex-col min-h-full bg-[#FFFBF8] pb-10">
+    <div className="flex flex-col min-h-full bg-transparent pb-10">
 
       {/* 1. REGISTERED USER VIEW */}
       {user ? (
         <div className="px-4 pt-3 pb-6">
 
           {/* Header Greeting & Mother Profile Avatar */}
-          <div className="flex items-start justify-between mb-3">
+          <div
+            className="flex items-start justify-between mb-3 animate-stagger-in"
+            style={{ animationDelay: '0ms' }}
+          >
             <div>
               <p className="text-sm text-neutral-600 font-medium flex items-center gap-1 mb-1">
-                Hai, {user.name ? user.name.split(' ')[0] : 'Bunda'}! <span className="inline-block animate-bounce">👋</span>
+                Hai, {user.name ? user.name.split(' ')[0] : 'Bunda'}!
+                <span className="inline-block ml-0.5" aria-hidden="true">👋</span>
               </p>
-              <h1 className="text-2xl font-bold text-neutral-900 leading-tight">
+              <h1 className="text-2xl font-medium text-neutral-800 leading-tight">
                 Rencana hari ini<br />
-                untuk si <span className="text-nakoo-green-600 font-extrabold">{profile?.child_name || 'Buah Hati'}</span> 🌱
+                untuk si{' '}
+                <span className="text-nakoo-green-600 font-extrabold">
+                  {profile?.child_name || 'Buah Hati'}
+                </span>
               </h1>
             </div>
 
             {/* Mother Profile Avatar Link */}
-            <Link to="/my-page" className="relative group shrink-0 ml-3 mt-1" title="Lihat Profil & Akun Saya">
-              <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-md group-hover:scale-108 group-active:scale-95 transition-all duration-300 overflow-hidden">
+            <Link to="/my-page" className="relative group shrink-0 ml-3 mt-1" aria-label="Lihat Profil & Akun Saya">
+              <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-orange-300 via-primary-300 to-nakoo-green-300 shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 overflow-hidden">
                 <img
                   src="/img/mother-avatar.jpg"
                   alt="Profil Bunda"
@@ -485,29 +420,42 @@ export function Home() {
                 />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-nakoo-green-500 border-2 border-white flex items-center justify-center text-white shadow-xs group-hover:scale-110 transition-transform">
-                <Heart className="w-2.5 h-2.5 fill-white animate-pulse" />
+                <Heart className="w-2.5 h-2.5 fill-white" aria-hidden="true" />
               </div>
             </Link>
           </div>
 
           {/* Date Chip & Completion Status */}
-          <div className="flex items-center justify-between mb-5">
+          <div
+            className="flex items-center justify-between mb-5 animate-stagger-in"
+            style={{ animationDelay: '60ms' }}
+          >
             <div className="flex items-center gap-1.5 bg-[#FFF2E5] border border-orange-200/60 text-orange-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow-xs hover:bg-[#ffe8d6] transition-colors">
-              <Calendar className="w-3.5 h-3.5 text-orange-600" />
+              <Calendar className="w-3.5 h-3.5 text-orange-600" aria-hidden="true" />
               <span>{todayFormatted}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 bg-white px-3 py-1.5 rounded-full border border-neutral-100 shadow-xs hover:shadow-sm transition-all">
-              <span className={`w-2 h-2 rounded-full inline-block ${completedCount === totalSlotsCount ? 'bg-nakoo-green-500 animate-bounce' : 'bg-nakoo-green-500 animate-pulse'}`} />
+              <span
+                aria-hidden="true"
+                className={`w-2 h-2 rounded-full inline-block ${
+                  completedCount === totalSlotsCount
+                    ? 'bg-nakoo-green-500 animate-bounce'
+                    : 'bg-nakoo-green-500 animate-pulse'
+                }`}
+              />
               <span>{completedCount}/{totalSlotsCount} selesai</span>
             </div>
           </div>
 
           {/* Top Quick Actions Card Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div
+            className="home-quick-grid grid grid-cols-2 gap-3 mb-6 animate-stagger-in"
+            style={{ animationDelay: '120ms' }}
+          >
 
             {/* Left Card: Rencana Hari Ini */}
             <Link
-              to="/my-page"
+              to="/#rencana-hari-ini"
               className="bg-[#FFF5EB] rounded-[28px] p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group active:scale-[0.98] border border-orange-100/60"
             >
               <div className="relative w-full aspect-square mb-2 rounded-2xl overflow-hidden flex items-center justify-center bg-orange-50/50">
@@ -580,7 +528,10 @@ export function Home() {
           </div>
 
           {/* Time Progress Indicator Bar */}
-          <div className="mb-6 bg-white rounded-2xl p-3.5 border border-neutral-100 shadow-xs hover:shadow-sm transition-all">
+          <div
+            className="mb-6 bg-white rounded-2xl p-3.5 border border-neutral-100 shadow-xs hover:shadow-sm transition-all animate-stagger-in"
+            style={{ animationDelay: '180ms' }}
+          >
             <div className="flex items-center justify-between text-xs text-neutral-500 mb-1.5 px-1 font-medium">
               <span className="flex items-center gap-1 text-neutral-600">☀️ Pagi</span>
               <span className="font-bold text-nakoo-red-500 flex items-center gap-1.5">
@@ -602,10 +553,12 @@ export function Home() {
           {/* ========================================================================= */}
           {/* BOTTOM SCHEDULE CARD: Registered (Empty) vs Registered-1 (Has Schedule)   */}
           {/* ========================================================================= */}
+          <div id="rencana-hari-ini" className="scroll-mt-5" />
+          <div className="animate-stagger-in" style={{ animationDelay: '240ms' }}>
           {loadingPlan ? (
-            <div className="bg-white rounded-[28px] p-8 shadow-card border border-neutral-100 text-center flex flex-col items-center animate-pulse">
-              <RefreshCw className="w-8 h-8 text-neutral-300 animate-spin mb-2" />
-              <p className="text-sm text-neutral-400">Memuat rencana hari ini...</p>
+            <div className="bg-white rounded-[28px] p-8 shadow-card border border-neutral-100/80 text-center flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full border-4 border-neutral-100 border-t-nakoo-green-400 animate-spin mb-3" />
+              <p className="text-sm text-neutral-400 font-medium">Memuat rencana hari ini...</p>
             </div>
           ) : !dailyPlan || !dailyPlan.slots || dailyPlan.slots.length === 0 ? (
 
@@ -744,12 +697,12 @@ export function Home() {
                           <span className="text-xs font-semibold text-neutral-600 mb-1">
                             {slot.time}
                           </span>
-                          <div className="h-5 flex items-center justify-center">
+                          <div className="min-h-11 flex items-center justify-center">
                             {isDone ? (
                               <button
                                 type="button"
                                 onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
-                                className="w-5 h-5 rounded-full bg-[#5B8353] text-white flex items-center justify-center shadow-xs cursor-pointer active:scale-75 transition-transform"
+                                className="w-11 h-11 rounded-full bg-[#5B8353] text-white flex items-center justify-center shadow-xs cursor-pointer active:scale-75 transition-transform"
                                 title="Sudah selesai (klik untuk ubah)"
                               >
                                 <Check className="w-3.5 h-3.5 stroke-[3] animate-check-pop" />
@@ -758,7 +711,7 @@ export function Home() {
                               <button
                                 type="button"
                                 onClick={() => slot.backendIndex >= 0 && toggleSlotDone(slot.backendIndex)}
-                                className="w-5 h-5 rounded-full border border-neutral-200 hover:border-neutral-300 text-transparent flex items-center justify-center cursor-pointer active:scale-75 transition-all"
+                                className="w-11 h-11 rounded-full border border-neutral-200 hover:border-neutral-300 text-transparent flex items-center justify-center cursor-pointer active:scale-75 transition-all"
                                 title="Tandai selesai"
                               />
                             )}
@@ -773,14 +726,15 @@ export function Home() {
               {/* View Full Schedule CTA Button */}
               <button
                 type="button"
-                onClick={() => navigate('/my-page')}
+                onClick={handleOpenScheduleModal}
                 className="w-full py-4 rounded-full bg-[#FBB040] hover:bg-[#faa020] text-white font-bold text-base shadow-lg shadow-orange-400/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 hover:-translate-y-0.5 transition-all duration-200 mt-5"
               >
                 <Calendar className="w-5 h-5" />
-                <span>Lihat rencana lengkap →</span>
+                <span>Atur rencana hari ini</span>
               </button>
             </div>
           )}
+          </div>{/* end animate-stagger-in wrapper */}
         </div>
 
       ) : (
@@ -808,7 +762,7 @@ export function Home() {
       {/* ========================================================================= */}
 
       {/* Menu Makan Pilihan */}
-      <section className="mb-8 mt-4">
+      <section className="mb-8 mt-4 animate-stagger-in" style={{ animationDelay: '80ms' }}>
         <div className="flex justify-between items-center px-4 mb-3">
           <h2 className="text-base font-bold text-neutral-800">Menu makan pilihan</h2>
           <Link to="/explore/menu" className="text-neutral-400 hover:text-orange-600 flex items-center gap-1 text-sm font-medium transition-colors group">
@@ -841,7 +795,7 @@ export function Home() {
       </section>
 
       {/* Aktivitas Pilihan */}
-      <section className="mb-8">
+      <section className="mb-8 animate-stagger-in" style={{ animationDelay: '160ms' }}>
         <div className="flex justify-between items-center px-4 mb-3">
           <h2 className="text-base font-bold text-neutral-800">Aktivitas Pilihan</h2>
           <Link to="/explore/activity" className="text-neutral-400 hover:text-orange-600 flex items-center gap-1 text-sm font-medium transition-colors group">
@@ -878,7 +832,7 @@ export function Home() {
 
       {/* CTA Banner (Non-logged-in only) */}
       {!user && (
-        <section className="px-4 mb-8">
+        <section className="px-4 mb-8 animate-stagger-in" style={{ animationDelay: '240ms' }}>
           <div className="bg-gradient-to-br from-primary-50 via-orange-50/50 to-nakoo-blue-50 rounded-[32px] p-6 flex flex-col items-center text-center relative overflow-hidden border border-primary-100 shadow-sm hover:shadow-md transition-shadow">
             <img src={ctaImg} alt="CTA Ilustrasi" className="w-32 h-40 object-contain mb-2 animate-float-subtle" />
 
@@ -897,7 +851,7 @@ export function Home() {
       )}
 
       {/* Kenapa Nakoo? */}
-      <section className="px-4 mb-8">
+      <section className="px-4 mb-8 animate-stagger-in" style={{ animationDelay: '200ms' }}>
         <h2 className="text-base font-bold text-neutral-800 mb-3">Kenapa Nakoo?</h2>
         <div className="flex flex-col gap-3">
           <div className="bg-white rounded-2xl p-4 flex gap-4 shadow-item border border-neutral-100/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">

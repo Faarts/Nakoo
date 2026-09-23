@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Check, X, Info } from 'lucide-react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { Check, X, Info, AlertCircle } from 'lucide-react';
 
 const ToastContext = createContext(null);
 
@@ -23,71 +23,97 @@ export function ToastProvider({ children }) {
     setToast(null);
   }, []);
 
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>
       {children}
-      {toast && <ToastItem toast={toast} onDismiss={dismissToast} />}
+      {toast && <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />}
     </ToastContext.Provider>
   );
 }
 
 function ToastItem({ toast, onDismiss }) {
+  const DURATION = 3500; // ms
+  const [exiting, setExiting] = useState(false);
+  const exitTimerRef  = useRef(null);
+  const autoTimerRef  = useRef(null);
+
+  const triggerDismiss = useCallback(() => {
+    if (exiting) return;
+    setExiting(true);
+    exitTimerRef.current = setTimeout(() => {
+      onDismiss();
+    }, 220);
+  }, [exiting, onDismiss]);
+
+  // Auto-dismiss after DURATION
+  useEffect(() => {
+    autoTimerRef.current = setTimeout(triggerDismiss, DURATION);
+    return () => {
+      clearTimeout(autoTimerRef.current);
+      clearTimeout(exitTimerRef.current);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const styles = {
-    success: 'bg-emerald-600 border-emerald-500 shadow-emerald-500/20',
-    error: 'bg-nakoo-red-500 border-red-400 shadow-red-500/20',
-    info: 'bg-nakoo-blue-500 border-blue-400 shadow-blue-500/20',
+    success: { bg: 'bg-emerald-600',     border: 'border-emerald-500', shadow: 'shadow-emerald-500/20' },
+    error:   { bg: 'bg-nakoo-red-500',   border: 'border-red-400',     shadow: 'shadow-red-500/20'     },
+    info:    { bg: 'bg-nakoo-blue-600',  border: 'border-blue-400',    shadow: 'shadow-blue-500/20'    },
   };
 
-  const Icons = {
+  const icons = {
     success: Check,
-    error: X,
-    info: Info,
+    error:   AlertCircle,
+    info:    Info,
   };
 
-  const colorClass = styles[toast.type] || styles.info;
-  const Icon = Icons[toast.type] || Icons.info;
+  const s    = styles[toast.type] || styles.info;
+  const Icon = icons[toast.type]  || icons.info;
 
   return (
-    <div 
-      className={`fixed top-4 left-4 right-4 max-w-md mx-auto z-[60] flex flex-col rounded-2xl shadow-xl text-white ${colorClass} border overflow-hidden animate-slide-up-fade transition-all duration-300 backdrop-blur-md`}
+    <div
+      className={`
+        fixed left-4 right-4 max-w-md mx-auto z-[60]
+        flex flex-col rounded-3xl shadow-xl text-white
+        ${s.bg} ${s.border} ${s.shadow}
+        border overflow-hidden backdrop-blur-md
+        ${exiting ? 'animate-toast-out' : 'animate-toast-in'}
+      `}
+      /* Position above the bottom nav (72px) + safe area padding */
+      style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
       role="alert"
+      aria-live="polite"
     >
       <div className="flex items-center justify-between p-3.5 gap-3">
-        <div className="flex items-center gap-2.5">
+        {/* Icon + message */}
+        <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center shrink-0 animate-bounce-once">
-            <Icon className="w-4 h-4 stroke-[3]" />
+            <Icon className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="text-sm font-semibold leading-tight">{toast.message}</span>
+          <span className="text-sm font-semibold leading-snug">{toast.message}</span>
         </div>
-        <button 
-          onClick={onDismiss}
-          className="p-1.5 rounded-full hover:bg-white/20 active:scale-90 transition-all text-white/80 hover:text-white cursor-pointer"
+
+        {/* Dismiss */}
+        <button
+          onClick={triggerDismiss}
+          aria-label="Tutup notifikasi"
+          className="p-1.5 rounded-full hover:bg-white/20 active:scale-90 transition-all shrink-0 text-white/80 hover:text-white cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
-      {/* Animated countdown timer line */}
+
+      {/* Countdown progress bar */}
       <div className="w-full h-1 bg-black/15 overflow-hidden">
-        <div 
-          className="h-full bg-white/60 transition-all ease-linear"
-          style={{
-            animation: 'toastProgress 3000ms linear forwards'
-          }}
+        <div
+          className="h-full bg-white/60"
+          style={{ animation: `toastProgress ${DURATION}ms linear forwards` }}
         />
       </div>
+
       <style>{`
         @keyframes toastProgress {
           from { width: 100%; }
-          to { width: 0%; }
+          to   { width: 0%;   }
         }
       `}</style>
     </div>

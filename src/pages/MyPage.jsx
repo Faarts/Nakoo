@@ -5,8 +5,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import {
   Bell,
-  SlidersHorizontal,
-  Camera,
   Calendar as CalendarIcon,
   ArrowRight,
   Edit2,
@@ -64,7 +62,7 @@ export function MyPage() {
   // Form State for editing child & parent profile
   const [childName, setChildName] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState('Perempuan');
+
   const [alergies, setAlergies] = useState([]);
   const [skills, setSkills] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -79,17 +77,17 @@ export function MyPage() {
       setChildName(profile.child_name || 'Aruna');
       setBirthDate(profile.birth_date || '2024-01-05');
       try {
-        setAlergies(profile.alergies ? (typeof profile.alergies === 'string' ? JSON.parse(profile.alergies) : profile.alergies) : ['Telur', 'Udang']);
-        setSkills(profile.focus_skills ? (typeof profile.focus_skills === 'string' ? JSON.parse(profile.focus_skills) : profile.focus_skills) : ['Motorik halus']);
+        setAlergies(profile.alergies ? (typeof profile.alergies === 'string' ? JSON.parse(profile.alergies) : profile.alergies) : []);
+        setSkills(profile.focus_skills ? (typeof profile.focus_skills === 'string' ? JSON.parse(profile.focus_skills) : profile.focus_skills) : []);
       } catch (e) {
-        setAlergies(['Telur', 'Udang']);
-        setSkills(['Motorik halus']);
+        setAlergies([]);
+        setSkills([]);
       }
     } else {
       setChildName('Aruna');
       setBirthDate('2024-01-05');
-      setAlergies(['Telur', 'Udang']);
-      setSkills(['Motorik halus']);
+      setAlergies([]);
+      setSkills([]);
     }
 
     // Fetch activities
@@ -121,7 +119,7 @@ export function MyPage() {
         birth_date: birthDate,
         alergies,
         focus_skills: skills,
-        available_materials: []
+        available_materials: typeof profile?.available_materials === 'string' ? JSON.parse(profile.available_materials) : profile?.available_materials || []
       });
       await refreshProfile();
       showToast("Profil berhasil diperbarui", "success");
@@ -136,19 +134,19 @@ export function MyPage() {
   const formattedBirthDate = formatIndonesianDate(birthDate || profile?.birth_date || '2024-01-05');
   const ageInMonths = calculateAgeInMonths(birthDate || profile?.birth_date || '2024-01-05');
   const displayChildName = childName || profile?.child_name || 'Aruna';
-  const allergiesString = (alergies && alergies.length > 0) ? alergies.join(', ') : 'Telur, Udang';
-  const skillsString = (skills && skills.length > 0) ? skills.join(', ') : 'Motorik halus';
+  const allergiesString = (alergies && alergies.length > 0) ? alergies.join(', ') : 'Tidak ada alergi tercatat';
+  const skillsString = (skills && skills.length > 0) ? skills.join(', ') : 'Belum dipilih';
 
   // Activities mapping for Trending and Hari Ini
   const trendingList = activities.slice(0, 4);
   const dailyActivitiesList = activities.slice(0, 6);
 
   return (
-    <div className="pb-28 bg-[#FBFBFB] min-h-screen">
+    <div className="pb-6 bg-transparent min-h-screen">
       <div className="px-5 pt-4">
         {/* Title & Subtitle */}
         <div className="mb-5">
-          <h1 className="text-2xl font-bold text-neutral-900 leading-tight">Profil</h1>
+          <h1 className="text-2xl font-medium text-neutral-800 leading-tight">Profil</h1>
           <p className="text-sm text-neutral-400 font-normal mt-0.5">
             Kelola informasi akun dan profil anak anda
           </p>
@@ -156,7 +154,6 @@ export function MyPage() {
 
         {/* 1. Parent Account Card (Ayu Lestari) */}
         <div
-          onClick={() => setIsEditOpen(true)}
           className="bg-[#FFF9F3] border border-[#F6C6A0] rounded-[24px] p-3.5 sm:p-4 mb-4 flex items-center gap-3.5 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group"
         >
           {/* Parent Avatar with Camera Badge */}
@@ -168,9 +165,7 @@ export function MyPage() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-[#5B8353] rounded-full border-2 border-white flex items-center justify-center text-white shadow-2xs">
-              <Camera className="w-2.5 h-2.5" />
-            </div>
+
           </div>
 
           {/* Parent Name & Email */}
@@ -201,7 +196,7 @@ export function MyPage() {
                   {displayChildName}
                 </h3>
                 <p className="text-xs text-neutral-500 font-medium flex items-center gap-1 mt-0.5">
-                  <span className="text-pink-500 font-semibold">♀</span> {gender} • {ageInMonths} bulan
+                  {ageInMonths} bulan
                 </p>
                 <p className="text-xs text-neutral-500 font-medium flex items-center gap-1.5 mt-0.5">
                   <CalendarIcon className="w-3.5 h-3.5 text-neutral-400" />
@@ -214,7 +209,7 @@ export function MyPage() {
             <button
               type="button"
               onClick={() => setIsEditOpen(true)}
-              className="w-8 h-8 rounded-full bg-neutral-50 hover:bg-orange-50 text-neutral-400 hover:text-orange-600 flex items-center justify-center transition-all active:scale-90 cursor-pointer shrink-0"
+              className="w-11 h-11 rounded-full bg-neutral-50 hover:bg-orange-50 text-neutral-400 hover:text-orange-600 flex items-center justify-center transition-all active:scale-90 cursor-pointer shrink-0"
               title="Edit Profil Anak"
             >
               <Edit2 className="w-4 h-4" />
@@ -235,7 +230,7 @@ export function MyPage() {
               />
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-neutral-900 leading-tight">Alergi</h4>
-                <p className="text-xs text-neutral-500 truncate mt-0.5">
+                <p className="text-xs text-neutral-500 break-words mt-0.5">
                   {allergiesString}
                 </p>
               </div>
@@ -258,10 +253,15 @@ export function MyPage() {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link to="/explore/menu?saved=1" className="rounded-2xl bg-primary-50 p-4 text-sm font-medium min-h-14">Makanan favorit →</Link>
+          <Link to="/explore/activity?saved=1" className="rounded-2xl bg-nakoo-green-50 p-4 text-sm font-medium min-h-14">Aktivitas favorit →</Link>
+        </div>
+
         {/* 3. Trending Section */}
         <section className="mb-6">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-base font-bold text-neutral-900">Trending</h3>
+            <h3 className="text-base font-bold text-neutral-900">Ide untuk si kecil</h3>
             <Link
               to="/explore/activity"
               className="text-neutral-700 hover:text-orange-600 transition-colors p-1"
@@ -306,7 +306,7 @@ export function MyPage() {
 
         {/* 4. Aktivitas Hari Ini Section */}
         <section className="mb-6">
-          <h3 className="text-base font-bold text-neutral-900 mb-3">Aktivitas Hari Ini</h3>
+          <h3 className="text-base font-bold text-neutral-900 mb-3">Ide aktivitas lainnya</h3>
 
           <div className="grid grid-cols-2 gap-3.5">
             {dailyActivitiesList.map((act, idx) => {
@@ -370,24 +370,7 @@ export function MyPage() {
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-bold text-neutral-700">Jenis Kelamin</label>
-              <div className="grid grid-cols-2 gap-2">
-                {['Perempuan', 'Laki-laki'].map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setGender(g)}
-                    className={`py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${gender === g
-                        ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
-                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
-                      }`}
-                  >
-                    {g === 'Perempuan' ? '♀ Perempuan' : '♂ Laki-laki'}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           {/* Alergi & Pantangan */}
