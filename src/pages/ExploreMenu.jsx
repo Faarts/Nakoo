@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { FilterBar } from '../components/FilterBar';
+import { FilterBottomSheet } from '../components/FilterBottomSheet';
 import { Card } from '../components/Card';
 import { Skeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
@@ -10,6 +12,11 @@ import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { Heart, Clock, AlertTriangle, SlidersHorizontal, ArrowRight } from 'lucide-react';
 import { DUMMY_RECIPES } from '../../.mock/recipes';
+import category01 from '../assets/img/category 01.png';
+import category02 from '../assets/img/category 02.png';
+import category03 from '../assets/img/category 03.png';
+import category04 from '../assets/img/category 04.png';
+import category05 from '../assets/img/category 05.png';
 
 const ageFilters = [
   { label: 'Semua', value: 'all' },
@@ -19,11 +26,11 @@ const ageFilters = [
 ];
 
 const categories = [
-  { label: 'Semua', value: 'all', icon: '🍲' },
-  { label: 'Sarapan', value: 'breakfast', icon: '🥣' },
-  { label: 'Makan Siang', value: 'lunch', icon: '🍛' },
-  { label: 'Cemilan', value: 'snack', icon: '🥮' },
-  { label: 'Makan Malam', value: 'dinner', icon: '🍝' }
+  { label: 'Semua', value: 'all', icon: category01 },
+  { label: 'Sarapan', value: 'breakfast', icon: category02 },
+  { label: 'Makan Siang', value: 'lunch', icon: category03 },
+  { label: 'Cemilan', value: 'snack', icon: category04 },
+  { label: 'Makan Malam', value: 'dinner', icon: category05 }
 ];
 
 export function ExploreMenu() {
@@ -39,6 +46,8 @@ export function ExploreMenu() {
   // Default age filter to 'all' or profile's age range
   const [activeFilter, setActiveFilter] = useState('all');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState(null);
 
   useEffect(() => {
     if (profile?.birth_date) {
@@ -105,6 +114,17 @@ export function ExploreMenu() {
     if (activeFilter !== 'all' && r.age_range !== activeFilter) return false;
     if (activeCategory !== 'all' && r.type !== activeCategory) return false;
     if (searchQuery && !r.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    // Advanced filters from FilterBottomSheet
+    if (advancedFilters) {
+      if (advancedFilters.alergen?.length > 0) {
+        const recipeAllergens = JSON.parse(r.allergens || '[]');
+        const shouldExclude = advancedFilters.alergen.some(a => {
+          const allergenMap = { 'Tanpa Telur': 'telur', 'Tanpa Susu': 'susu sapi', 'Tanpa Kacang': 'kacang', 'Tanpa Gluten': 'gluten' };
+          return recipeAllergens.includes(allergenMap[a]);
+        });
+        if (shouldExclude) return false;
+      }
+    }
     return true;
   });
 
@@ -116,7 +136,7 @@ export function ExploreMenu() {
       <div className="bg-white sticky top-0 z-10 pt-6 pb-2 shadow-sm">
         <div className="px-4 mb-3">
           <h1 className="text-2xl font-display font-bold text-neutral-900 mb-1">Eksplorasi Menu</h1>
-          <p className="text-neutral-500 text-sm">Temukan ide resep bernutrisi untuk si kecil</p>
+          <p className="text-neutral-600 text-sm">Temukan ide resep bernutrisi untuk si kecil</p>
         </div>
         <div className="px-4 mb-3 flex items-center gap-3">
           <div className="flex-1">
@@ -124,11 +144,8 @@ export function ExploreMenu() {
           </div>
           <button
             type="button"
-            onClick={() => {
-              // TODO: Implementasi filter
-              console.log("Filter ditekan");
-            }}
-            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white hover:bg-neutral-50 active:scale-95 transition-all relative shadow-[inset_0_4px_12px_white]"
+            onClick={() => setIsFilterOpen(true)}
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-nakoo-green-50 border border-white hover:bg-neutral-50 active:scale-95 transition-all relative shadow-inner-white"
             aria-label="Filter"
           >
             <SlidersHorizontal className="w-5 h-5 text-nakoo-green-500" strokeWidth={2.5} />
@@ -146,15 +163,15 @@ export function ExploreMenu() {
                   key={cat.value}
                   type="button"
                   onClick={() => setActiveCategory(cat.value)}
-                  className="flex flex-col items-center gap-2 min-w-fit"
+                  className="flex flex-col items-center gap-2 min-w-fit cursor-pointer"
                 >
                   <div
-                    className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl shadow-sm transition-all ${isActive
+                    className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl transition-all active:scale-95 ${isActive
                       ? 'bg-orange-100 ring-2 ring-orange-400 ring-offset-1'
-                      : 'bg-[#FFF5EB] hover:bg-orange-100'
+                      : 'bg-primary-50 hover:bg-orange-100'
                       }`}
                   >
-                    {cat.icon}
+                    {cat.icon && <img src={cat.icon} alt={cat.label} className="w-10 h-10 object-contain" />}
                   </div>
                   <span className={`text-xs ${isActive ? 'text-neutral-900 font-semibold' : 'text-neutral-600 font-medium'}`}>
                     {cat.label}
@@ -201,18 +218,20 @@ export function ExploreMenu() {
                 </div>
                 <div className="flex overflow-x-auto gap-4 px-4 pb-2 scrollbar-hide">
                   {filteredRecipes.slice(0, 2).map(recipe => (
-                    <Card key={`rec-${recipe.id}`} className="!p-0 overflow-hidden shrink-0 w-[280px] border border-neutral-100 shadow-sm rounded-2xl">
-                      <div className="aspect-[16/9] bg-neutral-100 relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-amber-100 opacity-60" />
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-1">{recipe.title}</h3>
-                        <div className="flex gap-2">
-                          <Badge variant="yellow" className="bg-[#FFF5EB] text-orange-700 !px-2 !py-0.5 font-medium">{recipe.age_range} bulan</Badge>
-                          <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-medium">+3</Badge>
+                    <Link key={`rec-${recipe.id}`} to={`/explore/menu/${recipe.id}`} className="shrink-0 w-[280px]">
+                      <Card className="!p-0 overflow-hidden border border-neutral-100 shadow-card rounded-2xl h-full">
+                        <div className="aspect-[16/9] bg-neutral-100 relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-amber-100 opacity-60" />
                         </div>
-                      </div>
-                    </Card>
+                        <div className="p-3">
+                          <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-1">{recipe.title}</h3>
+                          <div className="flex gap-2">
+                            <Badge variant="yellow" className="bg-[#FFF5EB] text-orange-700 !px-2 !py-0.5 font-medium">{recipe.age_range} bulan</Badge>
+                            <Badge variant="default" className="bg-purple-50 text-purple-600 !px-2 !py-0.5 font-medium">+3</Badge>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -229,36 +248,40 @@ export function ExploreMenu() {
                     const isFav = favorites.some(f => f.item_type === 'meal' && f.item_id === recipe.id);
 
                     return (
-                      <Card key={recipe.id} className="!p-0 overflow-hidden group flex flex-col h-full border border-neutral-100 shadow-sm hover:shadow-md rounded-2xl">
-                        <div className="aspect-[4/3] bg-neutral-100 relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 opacity-50" />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              toggleFavorite(recipe);
-                            }}
-                            className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 transition-colors"
-                          >
-                            <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />
-                          </button>
-                          {hasAllergenWarning && (
-                            <div className="absolute bottom-2 left-2 right-2 bg-red-100/90 backdrop-blur text-red-800 text-xs px-2 py-1 rounded-md flex items-center gap-1 font-medium shadow-sm">
-                              <AlertTriangle className="w-3 h-3 shrink-0" />
-                              <span className="truncate">Alergen: {recipeAllergens.find(a => childAllergies.includes(a))}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-3 flex flex-col grow">
-                          <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-2 leading-tight">
-                            {recipe.title}
-                          </h3>
-                          <div className="mt-auto flex items-center gap-2 flex-wrap">
-                            <Badge variant="red" className="!px-1.5 !py-0.5 !text-[10px] gap-1 bg-red-50 text-red-600">🍎 Buah</Badge>
-                            <Badge variant="yellow" className="!px-1.5 !py-0.5 !text-[10px] gap-1 bg-yellow-50 text-yellow-600">🧀 Keju</Badge>
+                      <Link key={recipe.id} to={`/explore/menu/${recipe.id}`} className="block h-full">
+                        <Card className="!p-0 overflow-hidden group flex flex-col h-full border border-neutral-100 shadow-card hover:shadow-md rounded-2xl">
+                          <div className="aspect-[4/3] bg-neutral-100 relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 opacity-50" />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleFavorite(recipe);
+                              }}
+                              className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-white/80 backdrop-blur rounded-full text-neutral-400 hover:text-red-500 active:scale-90 transition-all z-10"
+                              aria-label={isFav ? 'Hapus dari favorit' : 'Simpan ke favorit'}
+                            >
+                              <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />
+                            </button>
+                            {hasAllergenWarning && (
+                              <div className="absolute bottom-2 left-2 right-2 bg-red-100/90 backdrop-blur text-red-800 text-xs px-2 py-1 rounded-md flex items-center gap-1 font-medium shadow-sm">
+                                <AlertTriangle className="w-3 h-3 shrink-0" />
+                                <span className="truncate">Alergen: {recipeAllergens.find(a => childAllergies.includes(a))}</span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </Card>
+                          <div className="p-3 flex flex-col grow">
+                            <h3 className="font-semibold text-neutral-900 text-sm mb-2 line-clamp-2 leading-tight">
+                              {recipe.title}
+                            </h3>
+                            <div className="mt-auto flex items-center gap-2 flex-wrap">
+                              <Badge variant="yellow" className="!px-1.5 !py-0.5 !text-[10px] bg-primary-50 text-primary-700 font-medium">{recipe.age_range} bln</Badge>
+                              {recipe.prep_time && <Badge variant="default" className="!px-1.5 !py-0.5 !text-[10px] font-medium">{recipe.prep_time} mnt</Badge>}
+                            </div>
+                          </div>
+                        </Card>
+                      </Link>
                     );
                   })}
                 </div>
@@ -267,6 +290,12 @@ export function ExploreMenu() {
           </div>
         )}
       </div>
+
+      <FilterBottomSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={(filters) => setAdvancedFilters(filters)}
+      />
     </div>
   );
 }
