@@ -1,7 +1,7 @@
 import React from 'react';
 
 export function Skeleton({ type = 'text', className = '' }) {
-  const baseClass = "bg-neutral-200 animate-pulse";
+  const baseClass = "bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 animate-shimmer-sweep rounded-xl";
   
   const types = {
     card: "w-full h-48 rounded-2xl",

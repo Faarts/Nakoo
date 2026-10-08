@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
@@ -299,3 +300,7 @@ export function ExploreMenu() {
     </div>
   );
 }
+=======
+import { ExploreCatalog } from '../components/ExploreCatalog'
+export function ExploreMenu() { return <ExploreCatalog type="food" /> }
+>>>>>>> 1ed2701e131f7d51bcddb49f47f1fd849743e0cc

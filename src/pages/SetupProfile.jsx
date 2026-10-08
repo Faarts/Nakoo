@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 import { Button } from '../components/Button';
@@ -29,13 +29,13 @@ function ChipSelect({ options, selected, onChange }) {
             key={option}
             type="button"
             onClick={() => toggle(option)}
-            className={`px-4 py-2 text-sm rounded-full border transition-all ${
+            className={`px-4 py-2 text-xs font-bold rounded-full border transition-all duration-200 cursor-pointer active:scale-95 ${
               isSelected 
-                ? 'bg-primary-50 border-primary-500 text-primary-600 font-medium' 
-                : 'bg-white border-neutral-200 text-neutral-600'
+                ? 'bg-orange-50 border-orange-400 text-orange-800 shadow-2xs scale-105' 
+                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
             }`}
           >
-            {isSelected && <Check className="w-4 h-4 inline-block mr-1 -ml-1" />}
+            {isSelected && <Check className="w-3.5 h-3.5 inline-block mr-1 -ml-1 stroke-[3] animate-check-pop" />}
             {option}
           </button>
         );
@@ -47,6 +47,7 @@ function ChipSelect({ options, selected, onChange }) {
 export function SetupProfile() {
   const { refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [childName, setChildName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -79,7 +80,7 @@ export function SetupProfile() {
       });
       
       await refreshProfile();
-      navigate('/home', { replace: true });
+      navigate(location.state?.from || '/', { replace: true });
 
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat menyimpan profil');

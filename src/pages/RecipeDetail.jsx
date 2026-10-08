@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Heart, Flame, Dna, Droplet, LayoutList, ListOrdered, MoreHorizontal } from 'lucide-react';
@@ -215,3 +216,7 @@ export function RecipeDetail() {
     </div>
   );
 }
+=======
+import { CatalogDetail } from '../components/CatalogDetail'
+export function RecipeDetail() { return <CatalogDetail type="food" /> }
+>>>>>>> 1ed2701e131f7d51bcddb49f47f1fd849743e0cc

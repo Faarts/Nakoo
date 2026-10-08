@@ -1,3 +1,2 @@
-export function ExploreActivity() {
-  return <div className="p-4">Explore Activity</div>
-}
+import { ExploreCatalog } from '../components/ExploreCatalog'
+export function ExploreActivity() { return <ExploreCatalog type="activity" /> }

@@ -32,6 +32,7 @@ export function AuthProvider({ children }) {
   };
 
   const refreshAuth = async () => {
+    setLoading(true);
     try {
       if (import.meta.env.VITE_BYPASS_AUTH === 'true') {
         setUser({ id: 'bypass-id', name: 'Dev Bypass User', email: 'dev@nakoo.app' });
